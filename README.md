@@ -40,7 +40,7 @@ Matras est utilisé en lecture seule; aucun relevé n’y est envoyé. Les reche
 Les tests automatisés sont lancés localement avec :
 
 ```sh
-node --test --test-reporter=tap tests/
+node --test --test-reporter=tap tests/*.test.js
 ```
 
 Dernier résultat documenté : **232 tests réussis**. Le workflow GitHub Actions exécute la même suite sur Node 22 à chaque push et pull request. Les tests de réseau utilisent des réponses simulées; ils ne prouvent pas le comportement de chaque page Cardmarket réelle. Un contrôle navigateur le 15 novembre 2026 a confirmé l’injection du panneau et le fonctionnement du filtre de langue sur une fiche produit scellé; aucun achat ni changement d’offre n’a été effectué. Les résultats agrégés et limites sont dans [RAPPORT.md](RAPPORT.md) et [INVENTAIRE.md](INVENTAIRE.md).

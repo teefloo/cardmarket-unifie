@@ -6,7 +6,7 @@ Ce rapport volontairement agrégé ne publie aucun nom de vendeur, identifiant d
 
 ## Vérifications locales
 
-- `node --test --test-reporter=tap tests/` : **232 tests réussis**, aucun échec.
+- `node --test --test-reporter=tap tests/*.test.js` : **232 tests réussis**, aucun échec.
 - `node --check` sur les scripts JavaScript et les tests : aucune erreur de syntaxe.
 - `manifest.json` valide et déclare Manifest V3. Le stockage est requis; les hôtes non essentiels restent optionnels.
 - Tests de réseau simulés : aucune requête de test vers Matras, Mave, les boutiques, les listes ou les formulaires Cardmarket n’a été envoyée. Les actions d’écriture restent explicitement déclenchées et testées avec des transports simulés.

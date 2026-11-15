@@ -15,4 +15,4 @@ jobs:
         with:
           node-version: 22
       - name: Lancer les tests
-        run: node --test --test-reporter=tap tests/
+        run: node --test --test-reporter=tap tests/*.test.js
