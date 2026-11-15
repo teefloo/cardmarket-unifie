@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="96" viewBox="0 0 360 96" role="img" aria-labelledby="title desc">
+  <title id="title">Cardmarket Unifié</title>
+  <desc id="desc">Identité originale composée de cartes et d’un graphique de prix.</desc>
+  <rect x="4" y="8" width="78" height="78" rx="16" fill="#17324d"/>
+  <path d="M21 28h40v42H21z" fill="#f6f8fa" opacity=".96"/>
+  <path d="M29 59l9-10 8 6 15-17" fill="none" stroke="#168a83" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+  <circle cx="61" cy="38" r="4" fill="#168a83"/>
+  <text x="100" y="48" fill="#17324d" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="27" font-weight="700">Cardmarket</text>
+  <text x="101" y="74" fill="#527086" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="20" font-weight="600" letter-spacing="1.6">UNIFIÉ</text>
+</svg>

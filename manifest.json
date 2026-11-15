@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Cardmarket Unifié",
+  "version": "1.0.0",
+  "description": "Outils de prix, listes et graphiques pour Cardmarket.",
+  "permissions": ["storage"],
+  "host_permissions": ["https://www.cardmarket.com/*", "https://cardmarket.com/*"],
+  "optional_host_permissions": [
+    "https://charts.matrastcg.de/*",
+    "https://api-cardmarket.mave.me/*",
+    "https://help.cardmarket.com/*",
+    "https://kaiofcards.com/*",
+    "https://www.despelvogel.com/*",
+    "https://zycards.nl/*"
+  ],
+  "web_accessible_resources": [{
+    "resources": ["assets/grading/*.svg"],
+    "matches": ["https://www.cardmarket.com/*", "https://cardmarket.com/*"]
+  }],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [{
+    "matches": ["https://www.cardmarket.com/*", "https://cardmarket.com/*"],
+    "js": ["core.js", "settings.js", "promos.js", "wants-search.js", "wants-actions.js", "cart-summary.js", "cart-price-trend.js", "buyer-help.js", "duplicate-warnings.js", "shipping-estimator.js", "order-tools.js", "page-tools.js", "spoiler-tools.js", "content.js"],
+    "css": ["styles.css", "enhancements.css"],
+    "run_at": "document_idle"
+  }, {
+    "matches": ["https://kaiofcards.com/*", "https://www.despelvogel.com/*", "https://zycards.nl/*"],
+    "js": ["settings.js", "partner.js"],
+    "run_at": "document_idle"
+  }],
+  "action": { "default_title": "Cardmarket Unifié", "default_popup": "popup.html" },
+  "options_ui": { "page": "options.html", "open_in_tab": true }
+}
