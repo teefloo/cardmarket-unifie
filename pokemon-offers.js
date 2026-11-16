@@ -83,6 +83,47 @@
     return [productInfo, productAttributes, comment].filter(Boolean).join(' · ');
   }
 
+  function isLanguageMarker(element) {
+    const metadata = normalizeText([
+      element.getAttribute?.('data-language'),
+      element.getAttribute?.('data-lang'),
+      element.getAttribute?.('lang'),
+      element.getAttribute?.('aria-label'),
+      element.getAttribute?.('title'),
+      element.getAttribute?.('alt'),
+      element.getAttribute?.('data-original-title'),
+      element.getAttribute?.('data-bs-original-title'),
+      element.className,
+    ].filter(Boolean).join(' '));
+    if (/\b(?:flag|language|lang)\b/.test(metadata)) return true;
+    return /\b(?:en|fr|de|es|it|zh|ja|pt|ru|ko|tw|nl|pl|cs|hu)(?:[-_][a-z]{2})?\b/.test(metadata)
+      || /\b(?:english|french|francais|german|deutsch|spanish|espanol|italian|italiano|japanese|japonais|chinese|portuguese|russian|korean|dutch|polish|czech|hungarian)\b/.test(metadata);
+  }
+
+  function findLanguageMarker(attributes, condition) {
+    if (!attributes) return null;
+    const followsCondition = (element) => {
+      if (!condition) return true;
+      if (typeof condition.compareDocumentPosition === 'function') {
+        return Boolean(condition.compareDocumentPosition(element) & 4);
+      }
+      const siblings = attributes.children || attributes.childNodes || [];
+      return siblings.indexOf(element) > siblings.indexOf(condition);
+    };
+    const directIcon = attributes.querySelector?.(':scope > .icon.me-2')
+      || [...(attributes.children || [])].find((element) => /(?:^|\s)icon(?:\s|$)/.test(String(element.className || ''))
+        && /(?:^|\s)me-2(?:\s|$)/.test(String(element.className || '')));
+    if (directIcon && followsCondition(directIcon)) return directIcon;
+
+    const selector = '[data-language], [data-lang], [lang], [class*="language" i], [class*="flag" i], [aria-label], [title], [alt], [data-original-title], [data-bs-original-title]';
+    const descendants = attributes.querySelectorAll?.(selector) || attributes.children || attributes.childNodes || [];
+    for (const element of descendants) {
+      if (!isLanguageMarker(element)) continue;
+      if (followsCondition(element)) return element;
+    }
+    return null;
+  }
+
   function renderOfferTags(rows, { documentRef = root.document, getURL = root.chrome?.runtime?.getURL?.bind(root.chrome.runtime) } = {}) {
     if (!documentRef?.createElement) return 0;
     let updated = 0;
@@ -91,6 +132,7 @@
       const condition = row.querySelector?.('a.article-condition[class*="condition-"]') || row.querySelector?.('.article-condition');
       const target = condition || attributes;
       if (!target) continue;
+      const languageMarker = findLanguageMarker(attributes, condition);
       const tags = detectOfferTags(readOfferText(row));
       const signature = JSON.stringify(tags);
       if (row.dataset?.cmuOfferTagsSignature === signature) continue;
@@ -127,7 +169,8 @@
         }
         container.append(badge);
       }
-      if (condition?.insertAdjacentElement) condition.insertAdjacentElement('afterend', container);
+      const insertionPoint = languageMarker || condition;
+      if (insertionPoint?.insertAdjacentElement) insertionPoint.insertAdjacentElement('afterend', container);
       else target.append(container);
       updated += 1;
     }

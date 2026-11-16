@@ -27,7 +27,7 @@ test('rejects negated, hypothetical, and questioned tags', () => {
   ]) assert.deepEqual(Offers.detectOfferTags(claim), [], claim);
 });
 
-test('scans product information and comment, then adds compact tags beside the offer condition', () => {
+test('scans product information and comment, then adds tags after the language flag', () => {
   function element(tagName) {
     return {
       nodeType: 1,
@@ -71,6 +71,10 @@ test('scans product information and comment, then adds compact tags beside the o
   condition.className = 'article-condition condition-nm';
   condition.textContent = 'NM';
   attributes.append(condition);
+  const languageFlag = element('span');
+  languageFlag.className = 'icon me-2';
+  languageFlag.setAttribute('aria-hidden', 'true');
+  attributes.append(languageFlag);
   const comments = element('div');
   comments.className = 'product-comments';
   comments.textContent = 'PSA 9,5';
@@ -98,7 +102,7 @@ test('scans product information and comment, then adds compact tags beside the o
   assert.equal(Offers.renderOfferTags([row], { documentRef, getURL }), 1);
   const tags = attributes.children.find((child) => child.className === 'cmu-offer-tags');
   assert.ok(tags, 'a tag group is inserted beside the condition code');
-  assert.equal(attributes.children.indexOf(tags), attributes.children.indexOf(condition) + 1);
+  assert.equal(attributes.children.indexOf(tags), attributes.children.indexOf(languageFlag) + 1);
   assert.equal(tags.children.length, 2);
   assert.equal(tags.children[0].textContent, 'SCELLÉ');
   assert.equal(tags.children[1].children[0].src, `chrome-extension://extension-id/assets/grading/psa.svg`);
@@ -110,6 +114,12 @@ test('scans product information and comment, then adds compact tags beside the o
   const updated = attributes.children.find((child) => child.className === 'cmu-offer-tags');
   assert.equal(updated.children.length, 1, 'uncertain grades are omitted while product details remain scannable');
   assert.equal(updated.children[0].textContent, 'SCELLÉ');
+
+  languageFlag.remove();
+  delete row.dataset.cmuOfferTagsSignature;
+  assert.equal(Offers.renderOfferTags([row], { documentRef, getURL }), 1);
+  const fallback = attributes.children.find((child) => child.className === 'cmu-offer-tags');
+  assert.equal(attributes.children.indexOf(fallback), attributes.children.indexOf(condition) + 1, 'missing language marker falls back to immediately after the condition');
 });
 
 test('installs offer tags only on supported Pokémon product details', () => {
