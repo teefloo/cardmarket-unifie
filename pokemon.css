@@ -46,6 +46,46 @@
   color: var(--cmu-primary, currentColor);
 }
 
+.cmu-offer-tags {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: 5px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.cmu-offer-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 16px;
+  padding: 1px 4px;
+  border: 1px solid var(--bs-border-color, currentColor);
+  border-radius: 3px;
+  background: var(--bs-tertiary-bg, var(--bs-secondary-bg, transparent));
+  color: var(--bs-body-color, inherit);
+  font: 650 10px/1.2 system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.cmu-offer-tag--sealed {
+  color: var(--bs-emphasis-color, inherit);
+  letter-spacing: .025em;
+}
+
+.cmu-offer-grade-logo {
+  display: block;
+  width: 38px;
+  max-height: 12px;
+  object-fit: contain;
+}
+
+.cmu-offer-grade-score {
+  color: inherit;
+}
+
 .cmu-chart {
   margin: 14px 0;
   padding: 14px;

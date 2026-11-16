@@ -1,6 +1,6 @@
 # Pokémon Cardmarket
 
-Extension Chrome Manifest V3 pour le JCC Pokémon sur Cardmarket. Elle applique une préférence de langue avec le filtre natif du site, affiche des minima visibles par état et conserve le graphique d’historique pour les fiches Singles.
+Extension Chrome Manifest V3 pour le JCC Pokémon sur Cardmarket. Elle applique une préférence de langue avec le filtre natif du site, affiche des minima visibles par état et ajoute des tags locaux pour les offres explicitement scellées ou gradées. Le graphique d’historique reste disponible pour les fiches Singles.
 
 ## Fonctionnement
 
@@ -8,7 +8,8 @@ Extension Chrome Manifest V3 pour le JCC Pokémon sur Cardmarket. Elle applique 
 - Les fonctionnalités s’exécutent uniquement sur une fiche de produit Pokémon reconnue. Les fiches Singles peuvent également afficher l’historique si l’option est active.
 - Une langue choisie dans Réglages devient le filtre natif `language` de Cardmarket. « Toutes les langues » laisse le filtre du site agir normalement. Le choix natif manuel est conservé pour la fiche en cours.
 - Le bloc de prix calcule le prix minimum par état parmi les offres visibles. Il affiche `—` lorsqu’aucune offre visible ne correspond à l’état.
-- Les couleurs du graphique et des minima suivent le thème clair ou sombre de Cardmarket.
+- Les tags « scellé » et société/note de gradation apparaissent près de l’état seulement quand une mention explicite est trouvée dans les informations de l’offre ou son commentaire. Les wordmarks sont des SVG locaux.
+- Les couleurs du graphique, des minima et des tags suivent le thème clair ou sombre de Cardmarket.
 - Les pages de vérification Cloudflare ne sont ni manipulées ni contournées. L’extension attend passivement que les marqueurs du défi disparaissent; une navigation/recharge normale relance aussi l’initialisation.
 
 ## Données et autorisations
@@ -27,7 +28,8 @@ La suite de tests locale s’exécute avec `node --test --test-reporter=tap test
 
 ## Préparation à la distribution
 
-Le script crée un dossier de staging autonome de 17 fichiers dans `dist/chrome-web-store` et l’archive d’envoi `dist/pokemon-cardmarket.zip`. Le dossier source contient encore des modules et tests historiques non chargés par le manifeste; ne distribue pas le dossier source complet.
+Le script crée un dossier de staging autonome de 36 fichiers dans `dist/chrome-web-store` et l’archive d’envoi `dist/pokemon-cardmarket.zip`. Il comprend le helper Pokémon ciblé, les icônes de gradation locales et leur note de provenance. Le dossier source contient encore des modules et tests historiques non chargés par le manifeste; ne distribue pas le dossier source complet.
 
 Ce dépôt prépare un candidat local et ne revendique pas une conformité complète au Chrome Web Store. Avant envoi, il reste à vérifier en direct les pages réelles et la reprise après défi, confirmer les droits d’utilisation du fournisseur de graphique, fournir une URL publique de la politique de confidentialité et un contact, compléter les déclarations du tableau de bord, et produire une capture de fiche à partir d’une validation navigateur réelle. Aucune publication n’a été effectuée.
 
+Les wordmarks SVG de gradation sont des créations typographiques locales utilisées uniquement pour identifier les mentions d’offres; leur provenance et l’absence d’affiliation sont documentées dans le paquet.

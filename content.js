@@ -416,6 +416,7 @@
       if (applyOfferLanguage()) return;
       loadExtensionStyles();
       if (featureEnabled('showConditionPrices')) installConditionPriceMinima();
+      CardmarketPokemonOffers.installOfferTags();
       const product = productDetails();
       if (product?.game === 6 && featureEnabled('showHistoricalChart')) {
         addHistoricalChart(product).catch((error) => {

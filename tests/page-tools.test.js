@@ -451,16 +451,21 @@ test('recognizes the short Collect Aura alias only with a plausible grading scor
   }
 });
 
-test('keeps historical grading wordmarks out of the Pokémon release package', () => {
+test('packages only the declared local grading wordmarks for Pokémon offers', () => {
   const brands = ['psa', 'cgc', 'bgs', 'pca', 'ccc', 'ags', 'collect-aura', 'pure-grading', 'ace', 'tag', 'sgc', 'graad', 'mnt', 'ars', 'ksa', 'gma', 'hga'];
   const assetsDir = path.join(__dirname, '..', 'assets', 'grading');
   for (const brand of brands) {
     const svg = fs.readFileSync(path.join(assetsDir, `${brand}.svg`), 'utf8');
-    assert.match(svg, /<svg/);
-    assert.match(svg, /<text/);
+    assert.match(svg, /<svg\b/);
+    assert.match(svg, /<text\b/);
   }
   const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'manifest.json'), 'utf8'));
-  assert.ok(manifest.web_accessible_resources.every((entry) => !entry.resources.includes('assets/grading/*.svg')));
+  const resources = manifest.web_accessible_resources.flatMap((entry) => entry.resources);
+  for (const brand of brands) assert.ok(resources.includes(`assets/grading/${brand}.svg`), `${brand} logo is explicitly web accessible`);
+  assert.ok(!resources.includes('assets/grading/*.svg'), 'the manifest lists the required SVG resources explicitly');
+  const packageScript = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'package-webstore.mjs'), 'utf8');
+  assert.match(packageScript, /assets\/grading\/\$\{brand\}\.svg/);
+  assert.match(packageScript, /pokemon-offers\.js/);
 });
 
 function fakeNode(classes = [], parentElement = null, tagName = 'DIV') {

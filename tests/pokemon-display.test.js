@@ -17,3 +17,12 @@ test('minima and chart inherit Cardmarket light or dark theme colors without a f
   assert.match(content, /chartColor\('--bs-primary'/);
   assert.match(content, /chartColor\('--bs-body-color'/);
 });
+
+test('extension tags are compact, aligned with the offer condition and use theme-aware colors', () => {
+  assert.match(styles, /\.cmu-offer-tags\s*\{[^}]*display:\s*inline-flex/s);
+  assert.match(styles, /\.cmu-offer-tag\s*\{[^}]*--bs-tertiary-bg/s);
+  const helper = fs.readFileSync(path.join(root, 'pokemon-offers.js'), 'utf8');
+  assert.match(helper, /condition\.insertAdjacentElement\('afterend', container\)/);
+  assert.match(helper, /assets\/grading\/\$\{tag\.brand\}\.svg/);
+  assert.match(content, /CardmarketPokemonOffers\.installOfferTags\(\)/);
+});

@@ -12,6 +12,7 @@ const packageFiles = [
   'core.js',
   'settings.js',
   'runtime-guard.js',
+  'pokemon-offers.js',
   'content.js',
   'pokemon.css',
   'popup.html',
@@ -24,6 +25,9 @@ const packageFiles = [
   'assets/icons/cardmarket-16.png',
   'assets/icons/cardmarket-48.png',
   'assets/icons/cardmarket-128.png',
+  'assets/grading/PROVENANCE.md',
+  ...['ace', 'ags', 'ars', 'bgs', 'ccc', 'cgc', 'collect-aura', 'gma', 'graad', 'hga', 'ksa', 'mnt', 'pca', 'psa', 'pure-grading', 'sgc', 'tag']
+    .map((brand) => `assets/grading/${brand}.svg`),
 ];
 
 for (const pathToCheck of [outputDirectory, zipPath]) {

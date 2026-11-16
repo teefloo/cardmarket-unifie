@@ -85,7 +85,7 @@ test('manifest limits injection and optional network access to the focused featu
   assert.deepEqual(manifest.optional_host_permissions, ['https://charts.matrastcg.de/*']);
   const content = manifest.content_scripts[0];
   assert.ok(content.matches.every((pattern) => pattern.includes('/Pokemon/')));
-  assert.deepEqual(content.js, ['core.js', 'settings.js', 'runtime-guard.js', 'content.js']);
+  assert.deepEqual(content.js, ['core.js', 'settings.js', 'runtime-guard.js', 'pokemon-offers.js', 'content.js']);
   assert.equal(content.css, undefined);
   assert.ok(manifest.web_accessible_resources.some((item) => item.resources.includes('pokemon.css')));
   assert.doesNotMatch(JSON.stringify(manifest), /Mave|help\.cardmarket|kaiofcards|despelvogel|zycards/);
