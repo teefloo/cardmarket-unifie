@@ -8,6 +8,7 @@ Extension Chrome Manifest V3 pour le JCC Pokémon sur Cardmarket. Elle applique 
 - Les fonctionnalités s’exécutent uniquement sur une fiche de produit Pokémon reconnue. Les fiches Singles peuvent également afficher l’historique si l’option est active.
 - Une langue choisie dans Réglages devient le filtre natif `language` de Cardmarket. « Toutes les langues » laisse le filtre du site agir normalement. Le choix natif manuel est conservé pour la fiche en cours.
 - Le bloc de prix calcule le prix minimum par état parmi les offres visibles. Il affiche `—` lorsqu’aucune offre visible ne correspond à l’état.
+- Les couleurs du graphique et des minima suivent le thème clair ou sombre de Cardmarket.
 - Les pages de vérification Cloudflare ne sont ni manipulées ni contournées. L’extension attend passivement que les marqueurs du défi disparaissent; une navigation/recharge normale relance aussi l’initialisation.
 
 ## Données et autorisations

@@ -1,3 +1,212 @@
-.cmu-condition-prices{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0;padding:7px 0;color:#495057;font:12px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}.cmu-condition-prices-title{font-weight:650}.cmu-condition-prices-values{display:flex;gap:5px;flex-wrap:wrap}.cmu-condition-price{padding:2px 6px;border:1px solid #dee2e6;border-radius:4px;color:#343a40;text-decoration:none;font-variant-numeric:tabular-nums}.cmu-condition-price[href]:hover{border-color:#6c757d;color:#111}
-.cmu-chart{margin:14px 0;padding:14px;border:1px solid #dee2e6;border-radius:5px;background:#fff;color:#212529;font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}.cmu-chart .cmu-chart-header{display:grid;gap:10px;align-items:start}.cmu-chart-header>strong{font-size:15px}.cmu-chart-controls{display:grid;grid-template-columns:1fr 1fr auto;gap:8px}.cmu-chart-group{min-width:0;margin:0;padding:7px 9px;border:1px solid #dee2e6;border-radius:4px}.cmu-chart-group legend,.cmu-chart-native span{color:#6c757d;font-size:11px}.cmu-chart-ranges,.cmu-chart-tabs{display:flex;gap:4px;flex-wrap:wrap}.cmu-chart .cmu-button{padding:5px 8px;border:1px solid #0d6efd;border-radius:4px;background:#fff;color:#0d6efd;font:12px/1.35 system-ui,sans-serif;cursor:pointer}.cmu-chart .cmu-button.is-active{background:#e7f1ff;font-weight:650}.cmu-chart-native{display:flex;flex-direction:column;gap:5px;padding:6px 8px;border:1px solid #dee2e6;border-radius:4px;background:#f8f9fa}.cmu-chart-meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;min-height:26px;margin:8px 0 4px}.cmu-chart-period,.cmu-chart-averages{color:#6c757d;font-size:12px}.cmu-chart-averages{flex:1 1 100%}.cmu-chart-plot{position:relative}.cmu-chart canvas{display:block;width:100%;height:180px;touch-action:pan-y}.cmu-chart-tooltip{position:absolute;z-index:1;top:4px;max-width:calc(100% - 16px);padding:5px 8px;border:1px solid #dee2e6;border-radius:4px;background:#fff;color:#212529;box-shadow:0 2px 7px #21252920;font-size:12px;pointer-events:none}.cmu-chart-empty,.cmu-chart-status{margin:8px 0;padding:8px 10px;border-left:3px solid #6c757d;background:#f8f9fa;color:#495057;font-size:12px}.cmu-chart-status{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.cmu-chart-status a{color:#0d6efd;font-weight:600}@media(max-width:760px){.cmu-chart-controls{grid-template-columns:1fr}.cmu-chart-native{flex-direction:row;align-items:center;justify-content:space-between}.cmu-chart canvas{height:150px}}
-#tabContent-info:has(.cmu-chart),.tab-content:has(.cmu-chart){max-height:none!important;height:auto!important;overflow:visible!important}
+.cmu-condition-prices,
+.cmu-chart,
+.cmu-chart-status {
+  --cmu-ink: var(--bs-body-color, inherit);
+  --cmu-muted: var(--bs-secondary-color, currentColor);
+  --cmu-line: var(--bs-border-color, currentColor);
+  --cmu-paper: var(--bs-secondary-bg, transparent);
+  --cmu-card: var(--bs-body-bg, transparent);
+  --cmu-primary: var(--bs-primary, #0d6efd);
+  color: var(--cmu-ink, inherit);
+}
+
+.cmu-condition-prices {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+  padding: 7px 0;
+  font: 12px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.cmu-condition-prices-title {
+  color: var(--cmu-ink, inherit);
+  font-weight: 650;
+}
+
+.cmu-condition-prices-values {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.cmu-condition-price {
+  padding: 2px 6px;
+  border: 1px solid var(--cmu-line, currentColor);
+  border-radius: 4px;
+  background: var(--cmu-card, transparent);
+  color: var(--cmu-ink, inherit);
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.cmu-condition-price[href]:hover {
+  border-color: var(--cmu-primary, currentColor);
+  color: var(--cmu-primary, currentColor);
+}
+
+.cmu-chart {
+  margin: 14px 0;
+  padding: 14px;
+  border: 1px solid var(--cmu-line, currentColor);
+  border-radius: 5px;
+  background: var(--cmu-card, transparent);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.cmu-chart .cmu-chart-header {
+  display: grid;
+  gap: 10px;
+  align-items: start;
+}
+
+.cmu-chart-header > strong {
+  color: var(--cmu-ink, inherit);
+  font-size: 15px;
+}
+
+.cmu-chart-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+}
+
+.cmu-chart-group {
+  min-width: 0;
+  margin: 0;
+  padding: 7px 9px;
+  border: 1px solid var(--cmu-line, currentColor);
+  border-radius: 4px;
+  color: var(--cmu-ink, inherit);
+  background: transparent;
+}
+
+.cmu-chart-group legend,
+.cmu-chart-native span {
+  color: var(--cmu-muted, currentColor);
+  font-size: 11px;
+}
+
+.cmu-chart-ranges,
+.cmu-chart-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.cmu-chart .cmu-button {
+  padding: 5px 8px;
+  border: 1px solid var(--cmu-primary, currentColor);
+  border-radius: 4px;
+  background: var(--cmu-card, transparent);
+  color: var(--cmu-primary, currentColor);
+  font: 12px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif;
+  cursor: pointer;
+}
+
+.cmu-chart .cmu-button:hover,
+.cmu-chart .cmu-button.is-active {
+  background: var(--bs-primary-bg-subtle, var(--bs-secondary-bg, transparent));
+  font-weight: 650;
+}
+
+.cmu-chart-native {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px 8px;
+  border: 1px solid var(--cmu-line, currentColor);
+  border-radius: 4px;
+  background: var(--cmu-paper, transparent);
+}
+
+.cmu-chart-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: 26px;
+  margin: 8px 0 4px;
+}
+
+.cmu-chart-period,
+.cmu-chart-averages {
+  color: var(--cmu-muted, currentColor);
+  font-size: 12px;
+}
+
+.cmu-chart-averages {
+  flex: 1 1 100%;
+}
+
+.cmu-chart-plot {
+  position: relative;
+  min-width: 0;
+}
+
+.cmu-chart canvas {
+  display: block;
+  width: 100%;
+  height: 180px;
+  touch-action: pan-y;
+}
+
+.cmu-chart-tooltip {
+  position: absolute;
+  z-index: 1;
+  top: 4px;
+  max-width: calc(100% - 16px);
+  padding: 5px 8px;
+  border: 1px solid var(--cmu-line, currentColor);
+  border-radius: 4px;
+  background: var(--cmu-card, transparent);
+  color: var(--cmu-ink, inherit);
+  box-shadow: 0 2px 7px #21252920;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.cmu-chart-empty,
+.cmu-chart-status {
+  margin: 8px 0;
+  padding: 8px 10px;
+  border-left: 3px solid var(--cmu-muted, currentColor);
+  background: var(--cmu-paper, transparent);
+  color: var(--cmu-ink, inherit);
+  font-size: 12px;
+}
+
+.cmu-chart-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-left-color: var(--cmu-primary, currentColor);
+}
+
+.cmu-chart-status a {
+  color: var(--cmu-primary, currentColor);
+  font-weight: 600;
+}
+
+#tabContent-info:has(.cmu-chart),
+.tab-content:has(.cmu-chart) {
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+@media (max-width: 760px) {
+  .cmu-chart-controls { grid-template-columns: 1fr; }
+  .cmu-chart-native { flex-direction: row; align-items: center; justify-content: space-between; }
+  .cmu-chart canvas { height: 150px; }
+}
+
+@media (max-width: 420px) {
+  .cmu-chart { padding: 10px; }
+  .cmu-chart-ranges, .cmu-chart-tabs { gap: 4px; }
+  .cmu-chart .cmu-button { padding: 5px 6px; font-size: 11px; }
+  .cmu-chart canvas { height: 130px; }
+  .cmu-chart-tooltip { font-size: 11px; }
+}

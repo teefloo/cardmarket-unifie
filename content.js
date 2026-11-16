@@ -197,6 +197,11 @@
     const normalized = points.map((_, index) => CardmarketCore.getChartPointAt(points, index)).filter(Boolean);
     if (!CardmarketCore.hasRenderableChartSeries(normalized)) return false;
     const context = canvas.getContext('2d');
+    const styles = typeof getComputedStyle === 'function' ? getComputedStyle(canvas) : null;
+    const chartColor = (name, fallback) => styles?.getPropertyValue(name)?.trim() || fallback;
+    const primaryColor = chartColor('--bs-primary', '#0d6efd');
+    const textColor = chartColor('--bs-body-color', styles?.color || '#212529');
+    const mutedColor = chartColor('--bs-secondary-color', textColor);
     const width = canvas.width = Math.max(560, canvas.clientWidth * 2);
     const height = canvas.height = 240;
     const padX = 20, padY = 30;
@@ -210,7 +215,7 @@
     });
     const paint = (hoveredIndex = -1) => {
       context.clearRect(0, 0, width, height);
-      context.strokeStyle = '#0d6efd';
+      context.strokeStyle = primaryColor;
       context.lineWidth = 3;
       context.beginPath();
       normalized.forEach((_, index) => {
@@ -218,12 +223,12 @@
         if (index) context.lineTo(x, y); else context.moveTo(x, y);
       });
       context.stroke();
-      context.fillStyle = '#212529';
+      context.fillStyle = textColor;
       context.font = '16px system-ui';
       context.fillText(`${chartValueText(low, seriesName)} – ${chartValueText(high, seriesName)}`, padX, 21);
       if (hoveredIndex >= 0) {
         const { x, y } = pointPosition(hoveredIndex);
-        context.strokeStyle = '#6c757d';
+        context.strokeStyle = mutedColor;
         context.lineWidth = 1;
         context.setLineDash([5, 5]);
         context.beginPath();
@@ -231,7 +236,7 @@
         context.lineTo(x, height - padY);
         context.stroke();
         context.setLineDash([]);
-        context.fillStyle = '#0d6efd';
+        context.fillStyle = primaryColor;
         context.beginPath();
         context.arc(x, y, 6, 0, Math.PI * 2);
         context.fill();
