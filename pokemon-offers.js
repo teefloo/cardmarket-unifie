@@ -18,6 +18,26 @@
     { id: 'gma', name: 'GMA', pattern: /\bgma(?![a-z])/g },
     { id: 'hga', name: 'HGA', pattern: /\bhga(?![a-z])/g },
   ]);
+  const GRADING_LOGO_ASSETS = Object.freeze({
+    'collect-aura': 'assets/grading/logos/collect-aura.png',
+    'pure-grading': 'assets/grading/logos/pure-grading.svg',
+    bgs: 'assets/grading/logos/bgs.jpg',
+    psa: 'assets/grading/logos/psa.jpg',
+    cgc: 'assets/grading/logos/cgc.png',
+    pca: 'assets/grading/logos/pca.png',
+    ccc: 'assets/grading/logos/ccc.svg',
+    ags: 'assets/grading/logos/ags.svg',
+    ace: 'assets/grading/logos/ace.svg',
+    tag: 'assets/grading/logos/tag.png',
+    sgc: 'assets/grading/logos/sgc.png',
+    graad: 'assets/grading/logos/graad.png',
+    mnt: 'assets/grading/logos/mnt.png',
+    ars: 'assets/grading/logos/ars.png',
+    ksa: 'assets/grading/logos/ksa.jpg',
+    gma: 'assets/grading/logos/gma.png',
+    hga: 'assets/grading/logos/hga.svg',
+  });
+  const DARK_LOGO_PLATES = new Set(['ace', 'cgc', 'ccc', 'hga']);
   const UNCERTAINTY = /\b(?:maybe|might|could be|may be|contender|chance|worthy|candidate|possible|possibly|probably|probable|perhaps|peut etre|eventuellement|vielleicht|moglicherweise|konnten|quizas|posible|forse|probabilmente|misschien|mogelijk|talvez|possivelmente)\b/;
   const NEGATIONS = new Set(['not', 'non', 'nicht', 'no', 'sin', 'niet', 'nao', 'nie', 'pas', 'sans', 'sem', 'ne', 'ungraded', 'unscored']);
   const NEGATION_BRIDGES = new Set([
@@ -152,12 +172,22 @@
         badge.title = tag.type === 'grade' ? `Société de gradation · ${tag.label}` : 'Mention explicite de produit scellé';
         badge.setAttribute('aria-label', tag.type === 'grade' ? `Carte gradée par ${tag.brandName}${tag.grade ? `, note ${tag.grade}` : ''}` : 'Produit scellé explicitement mentionné');
         if (tag.type === 'grade') {
-          const image = documentRef.createElement('img');
-          image.className = 'cmu-offer-grade-logo';
-          image.src = getURL ? getURL(`assets/grading/${tag.brand}.svg`) : `assets/grading/${tag.brand}.svg`;
-          image.alt = tag.brandName;
-          image.decoding = 'async';
-          badge.append(image);
+          const logoAsset = GRADING_LOGO_ASSETS[tag.brand];
+          if (logoAsset) {
+            const image = documentRef.createElement('img');
+            image.className = `cmu-offer-grade-logo${DARK_LOGO_PLATES.has(tag.brand) ? ' cmu-offer-grade-logo--dark-plate' : ''}`;
+            image.src = getURL ? getURL(logoAsset) : logoAsset;
+            image.alt = tag.brandName;
+            image.decoding = 'async';
+            badge.append(image);
+          } else {
+            const fallback = documentRef.createElement('span');
+            fallback.className = 'cmu-offer-grade-logo-fallback';
+            fallback.title = `Logo original non intégré pour ${tag.brandName}`;
+            fallback.setAttribute('aria-hidden', 'true');
+            fallback.textContent = '◇';
+            badge.append(fallback);
+          }
           if (tag.grade) {
             const score = documentRef.createElement('span');
             score.className = 'cmu-offer-grade-score';
@@ -232,7 +262,7 @@
     return { scan, disconnect() { tableObserver?.disconnect(); pageObserver?.disconnect(); } };
   }
 
-  const api = { GRADING_BRANDS, detectOfferTags, readOfferText, renderOfferTags, installOfferTags };
+  const api = { GRADING_BRANDS, GRADING_LOGO_ASSETS, detectOfferTags, readOfferText, renderOfferTags, installOfferTags };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.CardmarketPokemonOffers = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

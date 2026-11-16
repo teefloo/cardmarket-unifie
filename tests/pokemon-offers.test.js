@@ -1,5 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const Offers = require('../pokemon-offers.js');
 
 test('detects explicit French and English sealed wording, including common typos', () => {
@@ -18,6 +20,50 @@ test('recognizes grading companies and scores with accent and decimal variants',
   assert.deepEqual(Offers.detectOfferTags('Collect Aura 9,5/10'), [
     { type: 'grade', brand: 'collect-aura', brandName: 'Collect Aura', grade: '9.5/10', label: 'Collect Aura 9.5/10' },
   ]);
+});
+
+test('declares only bundled original grading logo assets', () => {
+  const assets = Offers.GRADING_LOGO_ASSETS;
+  assert.deepEqual(assets, {
+    'collect-aura': 'assets/grading/logos/collect-aura.png',
+    'pure-grading': 'assets/grading/logos/pure-grading.svg',
+    bgs: 'assets/grading/logos/bgs.jpg',
+    psa: 'assets/grading/logos/psa.jpg',
+    cgc: 'assets/grading/logos/cgc.png',
+    pca: 'assets/grading/logos/pca.png',
+    ccc: 'assets/grading/logos/ccc.svg',
+    ags: 'assets/grading/logos/ags.svg',
+    ace: 'assets/grading/logos/ace.svg',
+    tag: 'assets/grading/logos/tag.png',
+    sgc: 'assets/grading/logos/sgc.png',
+    graad: 'assets/grading/logos/graad.png',
+    mnt: 'assets/grading/logos/mnt.png',
+    ars: 'assets/grading/logos/ars.png',
+    ksa: 'assets/grading/logos/ksa.jpg',
+    gma: 'assets/grading/logos/gma.png',
+    hga: 'assets/grading/logos/hga.svg',
+  });
+  const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'manifest.json'), 'utf8'));
+  const resources = new Set(manifest.web_accessible_resources.flatMap((entry) => entry.resources));
+  const packageScript = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'package-webstore.mjs'), 'utf8');
+  const provenance = fs.readFileSync(path.join(__dirname, '..', 'assets', 'grading', 'PROVENANCE.md'), 'utf8');
+  for (const [brand, asset] of Object.entries(assets)) {
+    const brandName = Offers.GRADING_BRANDS.find((entry) => entry.id === brand).name;
+    assert.match(provenance, new RegExp(`\\| ${brandName} \\|`, 'i'), `${brand} provenance row`);
+    if (!asset) continue;
+    assert.ok(fs.existsSync(path.join(__dirname, '..', asset)), `${brand} original asset exists`);
+    assert.ok(resources.has(asset), `${brand} logo is web accessible`);
+    assert.ok(packageScript.includes(`'${asset}'`), `${brand} logo is included in the package`);
+  }
+  assert.match(provenance, /aucune licence d’utilisation n’est confirmée/i);
+  assert.ok(!resources.has('assets/grading/pca.svg'));
+  assert.ok(!resources.has('assets/grading/sgc.svg'));
+  const pcaLogo = fs.readFileSync(path.join(__dirname, '..', assets.pca));
+  assert.deepEqual([pcaLogo.readUInt32BE(16), pcaLogo.readUInt32BE(20)], [440, 143], 'PCA uses the full uncropped source image');
+  const sgcLogo = fs.readFileSync(path.join(__dirname, '..', assets.sgc));
+  assert.deepEqual([sgcLogo.readUInt32BE(16), sgcLogo.readUInt32BE(20)], [556, 385], 'SGC uses the official image, not its favicon');
+  const gmaLogo = fs.readFileSync(path.join(__dirname, '..', assets.gma));
+  assert.deepEqual([gmaLogo.readUInt32BE(16), gmaLogo.readUInt32BE(20)], [156, 72], 'GMA uses the documented crop from the supplied source image');
 });
 
 test('rejects negated, hypothetical, and questioned tags', () => {
@@ -105,7 +151,7 @@ test('scans product information and comment, then adds tags after the language f
   assert.equal(attributes.children.indexOf(tags), attributes.children.indexOf(languageFlag) + 1);
   assert.equal(tags.children.length, 2);
   assert.equal(tags.children[0].textContent, 'SCELLÉ');
-  assert.equal(tags.children[1].children[0].src, `chrome-extension://extension-id/assets/grading/psa.svg`);
+  assert.equal(tags.children[1].children[0].src, `chrome-extension://extension-id/assets/grading/logos/psa.jpg`);
   assert.equal(tags.children[1].children[1].textContent, '9.5');
   assert.equal(Offers.renderOfferTags([row], { documentRef, getURL }), 0, 'unchanged rows are not re-rendered');
 
@@ -120,6 +166,22 @@ test('scans product information and comment, then adds tags after the language f
   assert.equal(Offers.renderOfferTags([row], { documentRef, getURL }), 1);
   const fallback = attributes.children.find((child) => child.className === 'cmu-offer-tags');
   assert.equal(attributes.children.indexOf(fallback), attributes.children.indexOf(condition) + 1, 'missing language marker falls back to immediately after the condition');
+
+  comments.textContent = 'SGC 9';
+  delete row.dataset.cmuOfferTagsSignature;
+  assert.equal(Offers.renderOfferTags([row], { documentRef, getURL }), 1);
+  const sgcBadge = attributes.children.find((child) => child.className === 'cmu-offer-tags')
+    .children.find((child) => child.className.includes('--grade'));
+  assert.equal(sgcBadge.children[0].className, 'cmu-offer-grade-logo');
+  assert.equal(sgcBadge.children[0].src, `chrome-extension://extension-id/assets/grading/logos/sgc.png`);
+
+  comments.textContent = 'PCA 9';
+  delete row.dataset.cmuOfferTagsSignature;
+  assert.equal(Offers.renderOfferTags([row], { documentRef, getURL }), 1);
+  const pcaBadge = attributes.children.find((child) => child.className === 'cmu-offer-tags')
+    .children.find((child) => child.className.includes('--grade'));
+  assert.equal(pcaBadge.children[0].className, 'cmu-offer-grade-logo');
+  assert.equal(pcaBadge.children[0].src, `chrome-extension://extension-id/assets/grading/logos/pca.png`);
 });
 
 test('installs offer tags only on supported Pokémon product details', () => {

@@ -26,8 +26,23 @@ const packageFiles = [
   'assets/icons/cardmarket-48.png',
   'assets/icons/cardmarket-128.png',
   'assets/grading/PROVENANCE.md',
-  ...['ace', 'ags', 'ars', 'bgs', 'ccc', 'cgc', 'collect-aura', 'gma', 'graad', 'hga', 'ksa', 'mnt', 'pca', 'psa', 'pure-grading', 'sgc', 'tag']
-    .map((brand) => `assets/grading/${brand}.svg`),
+  'assets/grading/logos/ace.svg',
+  'assets/grading/logos/ags.svg',
+  'assets/grading/logos/ars.png',
+  'assets/grading/logos/bgs.jpg',
+  'assets/grading/logos/ccc.svg',
+  'assets/grading/logos/cgc.png',
+  'assets/grading/logos/collect-aura.png',
+  'assets/grading/logos/gma.png',
+  'assets/grading/logos/graad.png',
+  'assets/grading/logos/hga.svg',
+  'assets/grading/logos/ksa.jpg',
+  'assets/grading/logos/mnt.png',
+  'assets/grading/logos/pca.png',
+  'assets/grading/logos/psa.jpg',
+  'assets/grading/logos/pure-grading.svg',
+  'assets/grading/logos/sgc.png',
+  'assets/grading/logos/tag.png',
 ];
 
 for (const pathToCheck of [outputDirectory, zipPath]) {

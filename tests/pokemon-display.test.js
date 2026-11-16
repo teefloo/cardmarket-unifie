@@ -25,6 +25,7 @@ test('extension tags follow the offer language flag and use theme-aware colors',
   assert.match(helper, /:scope > \.icon\.me-2/);
   assert.match(helper, /const insertionPoint = languageMarker \|\| condition/);
   assert.ok(helper.includes("insertionPoint?.insertAdjacentElement) insertionPoint.insertAdjacentElement('afterend', container)"));
-  assert.match(helper, /assets\/grading\/\$\{tag\.brand\}\.svg/);
+  assert.match(helper, /GRADING_LOGO_ASSETS\[tag\.brand\]/);
+  assert.match(helper, /cmu-offer-grade-logo-fallback/);
   assert.match(content, /CardmarketPokemonOffers\.installOfferTags\(\)/);
 });
