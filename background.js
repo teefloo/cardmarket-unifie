@@ -1,98 +1,60 @@
-importScripts('core.js');
+const HISTORY_ORIGIN = 'https://charts.matrastcg.de';
+const CARDMARKET_HOSTS = new Set(['www.cardmarket.com', 'cardmarket.com']);
 
-const ALLOWED_SERVICES = new Set([
-  'https://charts.matrastcg.de',
-  'https://api-cardmarket.mave.me',
-  'https://help.cardmarket.com',
-]);
-
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message?.type === 'shipping-estimate') {
-    const allowedKeys = new Set(['type', 'fromCountry', 'toCountry', 'locale']);
-    if (Object.keys(message).some((key) => !allowedKeys.has(key))) {
-      sendResponse({ error: 'Requête refusée.' });
-      return;
-    }
-    const url = CardmarketCore.buildShippingCostsUrl(message.fromCountry, message.toCountry, message.locale);
-    if (!url) {
-      sendResponse({ error: 'Requête refusée.' });
-      return;
-    }
-    chrome.permissions.contains({ origins: ['https://help.cardmarket.com/*'] }).then(async (allowed) => {
-      if (!allowed) {
-        sendResponse({ error: 'Autorisation réseau manquante. Active-la dans les options.' });
-        return;
-      }
-      try {
-        const response = await fetch(url, { credentials: 'omit' });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        sendResponse({ data: await response.json() });
-      } catch (error) {
-        sendResponse({ error: error.message });
-      }
-    }).catch(() => {
-      sendResponse({ error: 'Vérification de permission impossible.' });
-    });
-    return true;
-  }
-  if (message?.type !== 'service-request') return;
-
-  let url;
+function isPokemonSinglesSender(sender) {
+  if (sender?.frameId !== 0) return false;
   try {
-    url = new URL(message.url);
-  } catch {
-    sendResponse({ error: 'Adresse de service invalide.' });
-    return;
-  }
-  if (!ALLOWED_SERVICES.has(url.origin)) {
-    sendResponse({ error: 'Service non autorisé.' });
-    return;
-  }
+    const page = new URL(sender?.url || '');
+    return CARDMARKET_HOSTS.has(page.hostname.toLowerCase())
+      && /^\/(?:[a-z]{2}\/)?Pokemon\/Products\/Singles\/[^/]+\/[^/]+$/i.test(page.pathname);
+  } catch { return false; }
+}
 
-  const isMatrasRead = url.origin === 'https://charts.matrastcg.de'
+function isValidHistoryRequest(message) {
+  if (!message || Object.keys(message).some((key) => !['type', 'url'].includes(key))) return null;
+  let url;
+  try { url = new URL(message.url); }
+  catch { return null; }
+  const key = url.searchParams.get('key') || '';
+  const parameterNames = [...url.searchParams.keys()];
+  const valid = url.origin === HISTORY_ORIGIN
+    && !url.hash
+    && !url.username
+    && !url.password
     && url.pathname === '/api/v1/verlauf'
-    && ['1', '3', '6', '18', '19', '22'].includes(url.searchParams.get('spiel'))
+    && parameterNames.length === 3
+    && new Set(parameterNames).size === 3
+    && parameterNames.every((name) => ['spiel', 'id', 'key'].includes(name))
+    && url.searchParams.get('spiel') === '6'
     && Number.isSafeInteger(Number(url.searchParams.get('id')))
     && Number(url.searchParams.get('id')) > 0
-    && /^\/(?:Magic|YuGiOh|Pokemon|OnePiece|Lorcana|Riftbound)\/Products\/Singles\/[^/]+\/[^/]+$/i.test(url.searchParams.get('key') || '')
-    && !/[\u0000-\u001f]/.test(url.searchParams.get('key') || '');
-  const isMaveChart = url.origin === 'https://api-cardmarket.mave.me'
-    && url.pathname === '/chart'
-    && message.method === 'POST'
-    && CardmarketCore.validateMaveRequest(message.cardKey, message.payload, message.headers);
-  if (!isMatrasRead && !isMaveChart) {
-    sendResponse({ error: 'Requête refusée.' });
+    && /^\/Pokemon\/Products\/Singles\/[^/]+\/[^/]+$/i.test(key)
+    && !/[\u0000-\u001f]/.test(key);
+  return valid ? url : null;
+}
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type !== 'service-request') return;
+  const url = isValidHistoryRequest(message);
+  if (!url || !isPokemonSinglesSender(sender)) {
+    sendResponse({ error: 'Requête d’historique refusée.' });
     return;
   }
 
-  chrome.permissions.contains({ origins: [`${url.origin}/*`] }).then(async (allowed) => {
+  chrome.permissions.contains({ origins: [`${HISTORY_ORIGIN}/*`] }).then(async (allowed) => {
     if (!allowed) {
-      sendResponse({ error: 'Autorisation réseau manquante. Active-la dans les options.' });
+      sendResponse({ error: 'Autorisation du service d’historique manquante.' });
       return;
     }
-
     try {
-      const options = isMaveChart
-        ? {
-          method: 'POST',
-          credentials: 'omit',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Idempotency-Key': message.headers['X-Idempotency-Key'],
-            Expires: message.headers.Expires,
-          },
-          body: JSON.stringify(message.payload),
-        }
-        : { credentials: 'omit' };
-      const response = await fetch(url, options);
+      const response = await fetch(url, { credentials: 'omit', cache: 'no-store' });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      if (isMaveChart) sendResponse({ success: true });
-      else sendResponse({ data: await response.json() });
-    } catch (error) {
-      sendResponse({ error: error.message });
+      sendResponse({ data: await response.json() });
+    } catch {
+      sendResponse({ error: 'Service d’historique indisponible.' });
     }
-  }).catch(() => {
-    sendResponse({ error: 'Vérification de permission impossible.' });
-  });
+  }).catch(() => sendResponse({ error: 'Vérification de l’autorisation impossible.' }));
   return true;
 });
+
+if (typeof module !== 'undefined' && module.exports) module.exports = { isPokemonSinglesSender, isValidHistoryRequest };

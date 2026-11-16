@@ -4,11 +4,11 @@ require('../settings.js');
 const { shouldRunPartnerFeatures, getPartnerProductTitle, getPartnerPriceText, isPartnerProductCandidate, buildCardmarketSearchUrl } = require('../partner.js');
 
 test('honors both the global switch and the individual partner-links switch', () => {
-  assert.equal(shouldRunPartnerFeatures({ enabled: false }), false);
-  assert.equal(shouldRunPartnerFeatures({ enabled: true }), true);
+  assert.equal(shouldRunPartnerFeatures({ enabled: false, showPartnerLinks: true }), false);
+  assert.equal(shouldRunPartnerFeatures({ enabled: true, showPartnerLinks: true }), true);
   assert.equal(shouldRunPartnerFeatures({ enabled: true, showPartnerLinks: false }), false);
   assert.equal(shouldRunPartnerFeatures({ enabled: false, showPartnerLinks: true }), false);
-  assert.equal(shouldRunPartnerFeatures({}), true);
+  assert.equal(shouldRunPartnerFeatures({}), false);
 });
 
 test('derives product titles from product heading and image metadata instead of generic link labels', () => {

@@ -1,56 +1,32 @@
-<p align="center">
-  <img src="assets/cardmarket-unifie.svg" width="360" alt="Cardmarket Unifié — identité visuelle originale">
-</p>
+# Pokémon Cardmarket
 
-# Cardmarket Unifié
+Extension Chrome Manifest V3 pour le JCC Pokémon sur Cardmarket. Elle applique une préférence de langue avec le filtre natif du site, affiche des minima visibles par état et conserve le graphique d’historique pour les fiches Singles.
 
-[![Tests](https://github.com/teefloo/cardmarket-unifie/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/teefloo/cardmarket-unifie/actions/workflows/tests.yml)
+## Fonctionnement
 
-**Extension Chrome Manifest V3** pour Cardmarket et les jeux de cartes à collectionner (TCG). Elle réunit des outils de prix, de filtres, de suivi de listes et de graphiques historiques dans une interface unique.
+- Les scripts sont chargés uniquement sur les routes `Pokemon` de Cardmarket, avec ou sans préfixe de langue.
+- Les fonctionnalités s’exécutent uniquement sur une fiche de produit Pokémon reconnue. Les fiches Singles peuvent également afficher l’historique si l’option est active.
+- Une langue choisie dans Réglages devient le filtre natif `language` de Cardmarket. « Toutes les langues » laisse le filtre du site agir normalement. Le choix natif manuel est conservé pour la fiche en cours.
+- Le bloc de prix calcule le prix minimum par état parmi les offres visibles. Il affiche `—` lorsqu’aucune offre visible ne correspond à l’état.
+- Les pages de vérification Cloudflare ne sont ni manipulées ni contournées. L’extension attend passivement que les marqueurs du défi disparaissent; une navigation/recharge normale relance aussi l’initialisation.
 
-> **English summary:** Cardmarket Unifié is an independent Chrome MV3 extension for Cardmarket, with price tools, multi-language filters, read-only Matras charts and collection/order helpers.
+## Données et autorisations
 
-## Fonctions principales
+Le réglage de langue et les options d’affichage sont enregistrés dans `chrome.storage.local`. La page de confidentialité locale décrit les données lues et le seul service externe facultatif. L’extension ne charge pas de bibliothèque distante et n’envoie aucune offre à un service de suivi.
 
-- **Prix de vente :** Première offre, Moyenne, tendances 1/7/30 jours, professionnel, From et Min; ajustement, plancher, raccourcis et aperçu de lot.
-- **Offres et recherche :** filtre instantané texte/langue/état, choix multiple des langues natives, pays vendeur, prix par état et avertissements de doublons.
-- **Graphiques :** historique Matras en lecture seule, périodes et séries sélectionnables; le graphique Cardmarket natif reste accessible.
-- **Listes et commandes :** recherche locale dans les listes Wants après lecture à la demande, préparation avec confirmation, checklist et aides de recherche d’ordres.
-- **Autres outils :** aperçu de liens dans les messages au clic, copie de lignes/coordonnées, badges d’attributs de cartes et liens de boutiques partenaires facultatifs.
+Le seul accès réseau facultatif est `charts.matrastcg.de`, utilisé sans cookies pour obtenir l’historique d’une fiche Pokémon Singles après autorisation dans Réglages. Cardmarket fournit la page et le filtre natif. Les autres pages et domaines ne reçoivent pas de script de contenu.
 
-Les réglages regroupent les outils par usage. Chaque fonction peut être activée séparément; le popup fournit l’interrupteur général et le total de session.
+## Installation de développement
 
-## Installation dans Chrome
+1. Ouvre `chrome://extensions` et active le mode développeur.
+2. Lance `node scripts/package-webstore.mjs`, puis choisis **Charger l’extension non empaquetée** et sélectionne `dist/chrome-web-store`.
+3. Recharge le paquet après une modification, puis vérifie une fiche Singles et une fiche Pokémon scellée.
 
-1. Télécharge ou clone ce dossier sur ton ordinateur.
-2. Ouvre `chrome://extensions` et active le **mode développeur**.
-3. Choisis **Charger l’extension non empaquetée** puis sélectionne `cardmarket-unifie/`.
-4. Ouvre le popup pour accéder aux Réglages. Les permissions pour Matras, l’estimation d’envoi, Mave et les boutiques ne sont demandées que si tu actives ces services.
+La suite de tests locale s’exécute avec `node --test --test-reporter=tap tests/*.test.js`.
 
-Les réglages des anciennes extensions ne sont pas importés automatiquement. Les projets sources ne sont pas inclus dans ce dossier.
+## Préparation à la distribution
 
-## Permissions et données
+Le script crée un dossier de staging autonome de 17 fichiers dans `dist/chrome-web-store` et l’archive d’envoi `dist/pokemon-cardmarket.zip`. Le dossier source contient encore des modules et tests historiques non chargés par le manifeste; ne distribue pas le dossier source complet.
 
-L’extension requiert le stockage local et l’accès aux pages Cardmarket. Les accès optionnels sont séparés : Matras (lecture de l’historique), help.cardmarket.com (devis d’envoi), Mave (signalement facultatif de prix publics) et trois boutiques partenaires. Les permissions peuvent être retirées depuis Réglages.
+Ce dépôt prépare un candidat local et ne revendique pas une conformité complète au Chrome Web Store. Avant envoi, il reste à vérifier en direct les pages réelles et la reprise après défi, confirmer les droits d’utilisation du fournisseur de graphique, fournir une URL publique de la politique de confidentialité et un contact, compléter les déclarations du tableau de bord, et produire une capture de fiche à partir d’une validation navigateur réelle. Aucune publication n’a été effectuée.
 
-Matras est utilisé en lecture seule; aucun relevé n’y est envoyé. Les recherches Wants et d’ordres lisent les pages uniquement après une action explicite. Les changements d’alerte, ajouts Wants et suivis demandent un clic de confirmation. Le calculateur remplit le prix seulement au clic et ne sauvegarde pas l’offre.
-
-## Validation et limites
-
-Les tests automatisés sont lancés localement avec :
-
-```sh
-node --test --test-reporter=tap tests/*.test.js
-```
-
-Dernier résultat documenté : **232 tests réussis**. Le workflow GitHub Actions exécute la même suite sur Node 22 à chaque push et pull request. Les tests de réseau utilisent des réponses simulées; ils ne prouvent pas le comportement de chaque page Cardmarket réelle. Un contrôle navigateur le 15 novembre 2026 a confirmé l’injection du panneau et le fonctionnement du filtre de langue sur une fiche produit scellé; aucun achat ni changement d’offre n’a été effectué. Les résultats agrégés et limites sont dans [RAPPORT.md](RAPPORT.md) et [INVENTAIRE.md](INVENTAIRE.md).
-
-La parité complète avec les trois extensions d’origine n’est pas revendiquée. Le catalogue promo n’est qu’un échantillon de trois correspondances; l’historique temporel agrégé du panier, l’outil Companion historique Apply/Undo et le compteur privé de soutiens sont absents. L’aide acheteur/vendeur reste partielle. Les comportements authentifiés et plusieurs pages de commandes restent à valider en direct.
-
-## Réutilisation et provenance
-
-Ce dépôt n’a pas de fichier `LICENSE` et n’accorde actuellement aucune licence de réutilisation. Le code, le logo et les wordmarks présents ici ont été réimplémentés séparément; aucun code ou visuel des trois extensions sources n’est inclus. Certaines fonctionnalités ont été étudiées à partir de bundles locaux dont les conditions de réutilisation ne sont pas établies. Ne présume pas que leurs licences couvrent ce dépôt. La provenance des wordmarks est indiquée dans [`assets/grading/PROVENANCE.md`](assets/grading/PROVENANCE.md).
-
-## Sujets GitHub proposés
-
-`chrome-extension` · `cardmarket` · `tcg` · `pokemon` · `magic-the-gathering` · `yu-gi-oh` · `price-tracker`

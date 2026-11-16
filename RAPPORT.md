@@ -1,30 +1,31 @@
-# Rapport de validation — version partageable
+# Rapport de préparation
 
-**État : DONE_WITH_CONCERNS.** L’extension se charge localement comme extension Chrome Manifest V3. La parité fonctionnelle complète avec les trois sources n’est pas revendiquée.
+## Périmètre actif
 
-Ce rapport volontairement agrégé ne publie aucun nom de vendeur, identifiant de rangée/offre, identifiant de compte, total de session, prix saisi ou chemin de produit consulté. Les observations ci-dessous décrivent uniquement le résultat des contrôles et leur portée.
+Le manifeste ne charge que les modules ciblés sur les fiches Pokémon de Cardmarket, dont `pokemon-offers.js` pour les tags d’offres scellées/gradées. Les minima suivent le thème du site; le graphique historique suit aussi ses couleurs et reste limité aux fiches Singles avec autorisation réseau facultative. Les modules historiques hors de ce périmètre ne figurent pas dans le paquet Store créé par le script de préparation.
 
-## Vérifications locales
+## Confidentialité et réseau
 
-- `node --test --test-reporter=tap tests/*.test.js` : **232 tests réussis**, aucun échec.
-- `node --check` sur les scripts JavaScript et les tests : aucune erreur de syntaxe.
-- `manifest.json` valide et déclare Manifest V3. Le stockage est requis; les hôtes non essentiels restent optionnels.
-- Tests de réseau simulés : aucune requête de test vers Matras, Mave, les boutiques, les listes ou les formulaires Cardmarket n’a été envoyée. Les actions d’écriture restent explicitement déclenchées et testées avec des transports simulés.
-- Le workflow `.github/workflows/tests.yml` lance la suite Node 22 sur chaque push et pull request.
+Les préférences et l’analyse des offres restent locales. La page `privacy.html` détaille l’unique requête externe facultative, envoyée sans cookies et limitée aux historiques de fiches Singles Pokémon. Les logos de gradation sont locaux; les fonctions de suivi de prix externes, les boutiques partenaires et les outils sur les commandes ne sont plus chargés dans le paquet.
 
-## Observations navigateur agrégées
+## État des validations
 
-Le 15 novembre 2026, une fiche produit Cardmarket scellé a montré le panneau flottant et le filtre de langue. Le changement de choix de langue a masqué puis réaffiché les offres; le mode de prix a pu être changé puis restauré. Aucun achat, changement d’offre, ajout de panier ou autre transaction n’a été effectué. Le graphique historique n’était pas présent sur cette famille de produit.
+Validations exécutées sur le candidat courant :
 
-Sur des fiches produit accessibles lors d’essais précédents, le graphique Matras a tracé les séries prix et disponibilité, changé de période, affiché une valeur au survol et laissé le graphique Cardmarket natif être restauré. Le calculateur vendeur a rempli un champ de prix après clic, sans soumettre le formulaire. Le filtre texte/langue/état, les badges de gradation, les liens par état et les liens de recherche d’ordres ont aussi été observés. Les destinations de recherche d’ordres n’ont pas été ouvertes.
+- `node --test --test-reporter=spec tests/pokemon-offers.test.js tests/pokemon-display.test.js tests/content-integrations.test.js tests/runtime-guard.test.js tests/offer-language.test.js tests/settings.test.js tests/page-tools.test.js` : 67 réussis, 0 échec.
+- `node --test --test-reporter=tap tests/*.test.js` : 208 réussis, 0 échec.
+- `for file in *.js tests/*.test.js scripts/*.mjs; do node --check "$file" || exit 1; done` : syntaxe JavaScript vérifiée.
+- Les manifests source et empaqueté se parsèrent et sont identiques (`cmp -s manifest.json dist/chrome-web-store/manifest.json`). Le script de préparation vérifie aussi la présence des fichiers référencés par le manifeste.
+- `node scripts/package-webstore.mjs` : dossier de staging et archive ZIP créés; 36 fichiers copiés.
+- `unzip -l dist/pokemon-cardmarket.zip` : contenu de l’archive inspecté, icônes incluses.
+- `git diff --check` : aucune erreur d’espacement.
 
-Ces observations viennent de plusieurs essais et états de test; elles ne constituent pas une validation exhaustive de chaque route ni de chaque réglage. Les parcours authentifiés ne sont pas couverts; aucun détail de préférence ou de session n’est publié ici.
+Le test navigateur réel n’a pas été effectué. Il reste à installer le candidat dans Chrome et vérifier sur Cardmarket les fiches Singles et scellées, les tags de gradation/scellé, les thèmes clair/sombre ainsi que la reprise après défi Cloudflare. Aucun défi Cloudflare ne doit être contourné.
 
-## Limites restant à vérifier
+## Conditions restantes pour une publication
 
-- Plusieurs fonctions sont seulement vérifiées par tests Node/DOM simulés; celles qui nécessitent un compte, une page de commande ou des permissions optionnelles ne sont pas validées en direct.
-- L’aperçu positif d’une image de carte après le correctif, l’estimation réelle des frais, les actions Wants authentifiées, le suivi, le filtre pays et les partenaires après correctif restent à tester sur les pages concernées.
-- Le catalogue de promos n’est qu’un échantillon. Le total temporel agrégé du panier, Apply/Undo multi-offres de Companion et le compteur privé de soutiens restent absents. L’aide acheteur/vendeur demeure partielle.
-- Certains essais Cardmarket n’étaient pas accessibles depuis le navigateur de test. Aucun contrôle d’accès ni challenge n’a été contourné.
-
-Voir [INVENTAIRE.md](INVENTAIRE.md) pour la correspondance fonctionnelle détaillée et les statuts des tests locaux/live.
+- Confirmer le droit d’interroger et d’afficher les données du fournisseur du graphique.
+- Héberger `privacy.html` sur une URL publique et la déclarer dans le tableau de bord du Chrome Web Store.
+- Ajouter un moyen de contact public, les visuels du Store, les déclarations et justifications demandées par le tableau de bord.
+- Effectuer une vérification manuelle sur Cardmarket pour les Singles, produits scellés, filtres natifs, pages Cloudflare et navigation; produire ensuite une capture de fiche réelle pour le Store.
+- Examiner l’archive empaquetée finale avant envoi. Ce rapport ne déclare pas l’extension conforme ou publiée.

@@ -6,175 +6,129 @@ const {
   DEFAULTS,
   OFFER_LANGUAGES,
   getOfferLanguageId,
+  isPokemonPath,
   isOfferLanguageProductPath,
   buildOfferLanguageUrl,
   migrateSettings,
   loadSettings,
 } = require('../settings.js');
 
+const base = 'https://www.cardmarket.com';
+const singles = '/fr/Pokemon/Products/Singles/151/Pikachu-MEW025';
+const sealed = '/fr/Pokemon/Products/Booster-Boxes/Example-ETB';
 const expected = {
   en: 1, fr: 2, de: 3, es: 4, it: 5, zh: 6, ja: 7, pt: 8,
   ru: 9, ko: 10, tw: 11, nl: 12, pl: 13, cs: 14, hu: 15,
 };
-const cardPath = '/fr/Pokemon/Products/Singles/151/Pikachu-MEW025';
-const etbPath = '/fr/Pokemon/Products/Elite-Trainer-Boxes/Example-ETB';
-const boosterPath = '/en/Magic/Products/Booster-Boxes/Innistrad-Booster-Box';
 
-test('maps each supported Cardmarket offer language to its native language ID', () => {
-  assert.equal(OFFER_LANGUAGES[0].code, 'all');
-  for (const [language, id] of Object.entries(expected)) assert.equal(getOfferLanguageId(language), id, `${language} maps to ${id}`);
-  assert.deepEqual(Object.values(expected).sort((left, right) => left - right), Array.from({ length: 15 }, (_, index) => index + 1));
+test('maps each supported language to the native Cardmarket ID', () => {
+  assert.equal(DEFAULTS.preferredLanguage, '');
+  assert.equal(OFFER_LANGUAGES[0].code, '');
+  for (const [language, id] of Object.entries(expected)) assert.equal(getOfferLanguageId(language), id);
+  assert.equal(getOfferLanguageId(''), null);
   assert.equal(getOfferLanguageId('all'), null);
-  assert.equal(getOfferLanguageId('xx'), null);
+  assert.equal(getOfferLanguageId('unknown'), null);
 });
 
-test('shows an explicit All checkbox and one checkbox per language code', () => {
-  const html = fs.readFileSync(path.join(__dirname, '..', 'options.html'), 'utf8');
-  const options = fs.readFileSync(path.join(__dirname, '..', 'options.js'), 'utf8');
-  assert.match(html, /id="offerLanguageAll"/);
-  assert.match(html, /name="offerLanguages"/);
-  assert.match(html, /fiches produit détaillées.*Singles.*ETB.*boosters/i);
-  for (const { code } of OFFER_LANGUAGES.slice(1)) assert.match(html, new RegExp(`value="${code}"`));
-  assert.match(options, /querySelectorAll\('input\[name="offerLanguages"\]:checked'\)/);
-  assert.match(options, /allInput\.checked = settings\.offerLanguages\.length === 0/);
-  assert.match(options, /allInput\.addEventListener\('change'/);
-  assert.match(options, /input\.addEventListener\('change', \(\) => \{/);
-});
-
-test('applies the selected language array through one native URL parameter before pricing tools initialize', () => {
-  const content = fs.readFileSync(path.join(__dirname, '..', 'content.js'), 'utf8');
-  assert.match(content, /settings\.offerLanguages/);
-  assert.match(content, /CardmarketSettings\.buildOfferLanguageUrl\(location\.href, settings\.offerLanguages, previousOverride\)/);
-  assert.match(content, /location\.replace\(target\)/);
-  assert.match(content, /previousOverride\?\.languageIds \?\? previousOverride\?\.languageId/);
-  assert.match(content, /preserveCurrentPathManualChoice\(\)/);
-  assert.ok(content.indexOf('if (applyOfferLanguage()) return;') < content.indexOf('applyTheme();'));
-});
-
-test('migrates the old scalar setting and normalizes the new multiple selection', () => {
-  assert.deepEqual(DEFAULTS.offerLanguages, []);
-  assert.deepEqual(migrateSettings({}).offerLanguages, []);
-  assert.deepEqual(migrateSettings({ offerLanguage: 'all' }).offerLanguages, []);
-  assert.deepEqual(migrateSettings({ offerLanguage: 'fr' }).offerLanguages, ['fr']);
-  assert.deepEqual(migrateSettings({ offerLanguage: 'bad', theme: 'dark' }).offerLanguages, []);
-  assert.deepEqual(migrateSettings({ offerLanguages: ['ja', 'fr', 'xx', 'fr'] }).offerLanguages, ['fr', 'ja']);
-  assert.equal(Object.hasOwn(migrateSettings({ offerLanguage: 'fr' }), 'offerLanguage'), false);
-});
-
-test('loads and migrates old stored language without losing other preferences', async () => {
-  const data = { theme: 'dark', priceMode: 'avg', offerLanguage: 'fr' };
-  const storage = {
-    async get() { return { ...data }; },
-    async set(values) { Object.assign(data, values); },
-    async remove(key) { delete data[key]; },
-  };
-  const loaded = await loadSettings(storage);
-  assert.deepEqual(loaded.offerLanguages, ['fr']);
-  assert.equal(loaded.theme, 'dark');
-  assert.equal(loaded.priceMode, 'avg');
-  assert.deepEqual(data.offerLanguages, ['fr']);
-  assert.equal(Object.hasOwn(data, 'offerLanguage'), false);
-});
-
-test('builds sorted stable CSV language filters and preserves unrelated query and fragment', () => {
-  for (const [language, id] of Object.entries(expected)) {
-    const url = new URL(buildOfferLanguageUrl(`https://www.cardmarket.com${cardPath}`, [language]));
-    assert.equal(url.searchParams.get('language'), String(id), `${language} uses native id ${id}`);
-  }
-  for (const [selection, ids] of [[['ja', 'fr'], '2,7'], [['pt', 'en', 'fr'], '1,2,8'], [['ru', 'tw', 'ko'], '9,10,11']]) {
-    const url = new URL(buildOfferLanguageUrl(`https://www.cardmarket.com${cardPath}?foo=bar&language=15#offers`, selection));
-    assert.deepEqual(url.searchParams.getAll('language'), [ids]);
-    assert.equal(url.searchParams.get('foo'), 'bar');
-    assert.equal(url.hash, '#offers');
-  }
-});
-
-test('recognizes detail routes for Singles, ETB and another product family, but not product listings', () => {
-  assert.equal(isOfferLanguageProductPath(cardPath), true);
-  assert.equal(isOfferLanguageProductPath(etbPath), true);
-  assert.equal(isOfferLanguageProductPath(boosterPath), true);
+test('recognizes Pokémon product details and excludes other games and category pages', () => {
+  for (const route of [
+    singles,
+    sealed,
+    '/en/Pokemon/Products/Boosters/Sample-Booster',
+    '/en/Pokemon/Products/Blisters/Sample-Blister',
+    '/Pokemon/Products/Lots/Sample-Lot',
+  ]) assert.equal(isOfferLanguageProductPath(route), true, route);
+  assert.equal(isPokemonPath('/fr/Pokemon/Products/Search'), true);
+  assert.equal(isPokemonPath('/foo/Pokemon/Products/Singles/Set/Card'), false);
+  assert.equal(isPokemonPath('/fr/Pokemon/Orders/Buyer'), false);
+  assert.equal(isOfferLanguageProductPath('/en/Magic/Products/Booster-Boxes/Sample-Box'), false);
   assert.equal(isOfferLanguageProductPath('/fr/Pokemon/Products/Search?searchString=ETB'), false);
-  assert.equal(isOfferLanguageProductPath('/fr/Pokemon/Products/Elite-Trainer-Boxes'), false);
-  assert.equal(isOfferLanguageProductPath('/fr/Pokemon/Cards/Sample-Mega-Card-ex'), false);
+  assert.equal(isOfferLanguageProductPath('/fr/Pokemon/Products/Booster-Boxes'), false);
+  assert.equal(isOfferLanguageProductPath('/fr/Pokemon/Cards/Sample-Card'), false);
+  assert.equal(isOfferLanguageProductPath('/foo/Pokemon/Products/Singles/Set/Card'), false);
 });
 
-test('accepts the generic product-detail route shape across the requested Cardmarket families', () => {
-  const families = {
-    boosters: '/en/Pokemon/Products/Boosters/Example-Set-Booster',
-    'booster boxes': '/en/Pokemon/Products/Booster-Boxes/Example-Booster-Bundle',
-    blisters: '/fr/Pokemon/Products/Blisters/Scarlet-Violet-Booster-Blister',
-    sealed: '/fr/Pokemon/Products/Sealed/Example-Set-ETB',
-    sets: '/fr/Pokemon/Products/Sets/Example-Set-Set',
-    lots: '/fr/Pokemon/Products/Lots/151-Collection-Lot',
-    accessories: '/en/Magic/Products/Accessories/Dragon-Shield-Sleeves',
+test('applies one native language while preserving the rest of the URL', () => {
+  const target = new URL(buildOfferLanguageUrl(`${base}${singles}?foo=bar&language=3#offers`, 'fr'));
+  assert.deepEqual(target.searchParams.getAll('language'), ['2']);
+  assert.equal(target.searchParams.get('foo'), 'bar');
+  assert.equal(target.hash, '#offers');
+  assert.equal(buildOfferLanguageUrl(`${base}${singles}?language=2`, 'fr'), null);
+  const canonical = new URL(buildOfferLanguageUrl(`${base}${singles}?language=2&language=7&keep=yes`, 'ja'));
+  assert.deepEqual(canonical.searchParams.getAll('language'), ['7']);
+  assert.equal(canonical.searchParams.get('keep'), 'yes');
+});
+
+test('applies the configured preference across Pokémon sealed product details', () => {
+  const target = new URL(buildOfferLanguageUrl(`${base}${sealed}?sellerCountry=7`, 'ja'));
+  assert.deepEqual(target.searchParams.getAll('language'), ['7']);
+  assert.equal(target.searchParams.get('sellerCountry'), '7');
+});
+
+test('leaves native filtering untouched without a preference and restores only its own override', () => {
+  const nativeUrl = `${base}${singles}?language=3&foo=bar#offers`;
+  assert.equal(buildOfferLanguageUrl(nativeUrl, ''), null);
+  const restored = new URL(buildOfferLanguageUrl(`${base}${singles}?language=2&foo=bar#offers`, '', {
+    languageId: '2', previousLanguages: ['3'],
+  }));
+  assert.deepEqual(restored.searchParams.getAll('language'), ['3']);
+  assert.equal(restored.searchParams.get('foo'), 'bar');
+  assert.equal(restored.hash, '#offers');
+  assert.equal(buildOfferLanguageUrl(`${base}${singles}?language=7`, '', {
+    languageId: '2', previousLanguages: ['3'],
+  }), null, 'a changed native filter is not overwritten');
+  assert.equal(buildOfferLanguageUrl(nativeUrl, '', { manual: true }), null);
+});
+
+test('migrates legacy scalar and multiple language settings to one value', () => {
+  assert.equal(migrateSettings({}).preferredLanguage, '');
+  assert.equal(migrateSettings({ offerLanguage: 'fr' }).preferredLanguage, 'fr');
+  assert.equal(migrateSettings({ offerLanguage: 'all' }).preferredLanguage, '');
+  assert.equal(migrateSettings({ offerLanguages: ['ja', 'fr', 'xx', 'fr'] }).preferredLanguage, 'fr');
+  assert.equal(migrateSettings({ preferredLanguage: 'de', offerLanguages: ['fr'] }).preferredLanguage, 'de');
+  assert.equal(migrateSettings({ preferredLanguage: '', offerLanguage: 'fr' }).preferredLanguage, '');
+  assert.equal(migrateSettings({ preferredLanguage: 'xx', offerLanguage: 'fr' }).preferredLanguage, 'fr');
+});
+
+test('persists the migrated setting and removes the old language preferences', async () => {
+  const stored = { offerLanguage: 'fr', offerLanguages: ['fr', 'ja'], showBuyerHelp: true, unrelated: 'keep' };
+  const removed = [];
+  const storage = {
+    async get() { return { ...stored }; },
+    async set(values) { Object.assign(stored, values); },
+    async remove(keys) { removed.push(...keys); for (const key of keys) delete stored[key]; },
   };
-  for (const [family, pathname] of Object.entries(families)) {
-    assert.equal(isOfferLanguageProductPath(pathname), true, `${family} detail route`);
-    const target = new URL(buildOfferLanguageUrl(`https://www.cardmarket.com${pathname}?foo=bar`, ['fr', 'ja']));
-    assert.equal(target.searchParams.get('language'), '2,7', `${family} uses the shared native CSV`);
-    assert.equal(target.searchParams.get('foo'), 'bar');
-  }
-  for (const productType of Object.keys(families)) {
-    const category = `/en/Pokemon/Products/${productType}`;
-    assert.equal(isOfferLanguageProductPath(category), false, `${productType} category root`);
-  }
-  assert.equal(isOfferLanguageProductPath('/en/Pokemon/Products/Search?searchString=booster'), false);
+  const settings = await loadSettings(storage);
+  assert.equal(settings.preferredLanguage, 'fr');
+  assert.equal(stored.preferredLanguage, 'fr');
+  assert.equal(stored.unrelated, 'keep');
+  assert.ok(removed.includes('offerLanguage'));
+  assert.ok(removed.includes('offerLanguages'));
+  assert.ok(removed.includes('showBuyerHelp'));
 });
 
-test('applies and restores the native filter on sealed and booster product detail routes', () => {
-  for (const productPath of [etbPath, boosterPath]) {
-    const selected = new URL(buildOfferLanguageUrl(`https://www.cardmarket.com${productPath}?foo=bar&language=15#offers`, ['ja', 'fr']));
-    assert.deepEqual(selected.searchParams.getAll('language'), ['2,7']);
-    assert.equal(selected.searchParams.get('foo'), 'bar');
-    assert.equal(selected.hash, '#offers');
-    const restored = new URL(buildOfferLanguageUrl(selected.toString(), [], {
-      languageIds: '2,7', previousLanguages: ['15'],
-    }));
-    assert.deepEqual(restored.searchParams.getAll('language'), ['15']);
-    assert.equal(restored.searchParams.get('foo'), 'bar');
-    assert.equal(restored.hash, '#offers');
-  }
-});
-
-test('keeps a manual language change on an ETB route and does not redirect an already matching selection', () => {
-  const manualUrl = `https://www.cardmarket.com${etbPath}?language=3`;
-  assert.equal(buildOfferLanguageUrl(manualUrl, ['fr'], { manual: true }), null);
-  assert.equal(buildOfferLanguageUrl(`https://www.cardmarket.com${etbPath}?language=2,7`, ['ja', 'fr']), null);
-});
-
-test('empty selection leaves a native filter alone and clears only a matching extension override', () => {
-  const current = `https://www.cardmarket.com${cardPath}?language=2,7&foo=bar#offers`;
-  assert.equal(buildOfferLanguageUrl(current, []), null);
-  const cleared = new URL(buildOfferLanguageUrl(current, [], { languageIds: '2,7', previousLanguages: [] }));
-  assert.equal(cleared.searchParams.has('language'), false);
-  const reset = new URL(buildOfferLanguageUrl(current, [], { languageIds: '2,7', previousLanguages: ['7'] }));
-  assert.deepEqual(reset.searchParams.getAll('language'), ['7']);
-  assert.equal(reset.searchParams.get('foo'), 'bar');
-  assert.equal(reset.hash, '#offers');
-  const resetMultiple = new URL(buildOfferLanguageUrl(current, [], { languageIds: '2,7', previousLanguages: ['7', '2'] }));
-  assert.deepEqual(resetMultiple.searchParams.getAll('language'), ['2,7']);
-});
-
-test('migrates an old single-language session marker and preserves a changed manual filter', () => {
-  const current = `https://www.cardmarket.com${cardPath}?language=2&foo=bar`;
-  const restored = new URL(buildOfferLanguageUrl(current, [], { languageId: '2', previousLanguages: ['7'] }));
-  assert.deepEqual(restored.searchParams.getAll('language'), ['7']);
-  assert.equal(buildOfferLanguageUrl(`https://www.cardmarket.com${cardPath}?language=7`, [], { languageId: '2', previousLanguages: [] }), null);
-});
-
-test('preserves a manually changed native choice while the configured override is active', () => {
-  const current = `https://www.cardmarket.com${cardPath}?language=7`;
-  assert.equal(buildOfferLanguageUrl(current, ['fr'], { manual: true }), null);
-  const content = fs.readFileSync(path.join(__dirname, '..', 'content.js'), 'utf8');
-  assert.match(content, /overrides\[location\.pathname\] = \{ manual: true \}/);
-});
-
-test('canonicalizes equal selections, does not duplicate language parameters, and ignores non-product pages', () => {
-  assert.equal(buildOfferLanguageUrl(`https://www.cardmarket.com${cardPath}?language=2,7`, ['ja', 'fr']), null);
-  const duplicate = new URL(buildOfferLanguageUrl(`https://www.cardmarket.com${cardPath}?language=2&language=7&foo=x`, ['ja', 'fr']));
-  assert.deepEqual(duplicate.searchParams.getAll('language'), ['2,7']);
-  assert.equal(duplicate.searchParams.get('foo'), 'x');
-  assert.equal(buildOfferLanguageUrl('https://www.cardmarket.com/en/Pokemon/Products/Search?foo=bar', ['fr']), null);
-  assert.equal(buildOfferLanguageUrl('https://www.cardmarket.com/fr/Pokemon/Products/Elite-Trainer-Boxes', ['fr']), null);
-  assert.equal(buildOfferLanguageUrl('https://www.cardmarket.com/fr/Pokemon/Cards/Sample-Mega-Card-ex', ['fr']), null);
+test('options expose a single preference and the content entry is gated before UI', () => {
+  const directory = path.join(__dirname, '..');
+  const options = fs.readFileSync(path.join(directory, 'options.html'), 'utf8');
+  const content = fs.readFileSync(path.join(directory, 'content.js'), 'utf8');
+  const manifest = JSON.parse(fs.readFileSync(path.join(directory, 'manifest.json'), 'utf8'));
+  assert.match(options, /id="preferredLanguage"/);
+  assert.doesNotMatch(options, /name="offerLanguages"|id="offerLanguageAll"/);
+  for (const language of Object.keys(expected)) assert.match(options, new RegExp(`value="${language}"`));
+  assert.match(content, /CardmarketRuntime\.runWhenReady\(initializePokemonPage\)/);
+  assert.match(content, /loadExtensionStyles\(\)/);
+  assert.doesNotMatch(content.slice(content.lastIndexOf('function initializePokemonPage')), /addTableFilter\(\)|addGameNavigation\(\)/);
+  const script = manifest.content_scripts[0];
+  assert.deepEqual(script.matches, [
+    'https://www.cardmarket.com/Pokemon/Products/*',
+    'https://www.cardmarket.com/*/Pokemon/Products/*',
+    'https://cardmarket.com/Pokemon/Products/*',
+    'https://cardmarket.com/*/Pokemon/Products/*',
+  ]);
+  assert.deepEqual(manifest.web_accessible_resources[0].matches, [
+    'https://www.cardmarket.com/*',
+    'https://cardmarket.com/*',
+  ]);
+  assert.deepEqual(script.js, ['core.js', 'settings.js', 'runtime-guard.js', 'pokemon-offers.js', 'content.js']);
+  assert.equal(script.css, undefined, 'styles are added only after the challenge guard passes');
 });

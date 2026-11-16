@@ -1,33 +1,61 @@
 {
   "manifest_version": 3,
-  "name": "Cardmarket Unifié",
+  "name": "Pokémon Cardmarket",
   "version": "1.0.0",
-  "description": "Outils de prix, listes et graphiques pour Cardmarket.",
-  "permissions": ["storage"],
-  "host_permissions": ["https://www.cardmarket.com/*", "https://cardmarket.com/*"],
-  "optional_host_permissions": [
-    "https://charts.matrastcg.de/*",
-    "https://api-cardmarket.mave.me/*",
-    "https://help.cardmarket.com/*",
-    "https://kaiofcards.com/*",
-    "https://www.despelvogel.com/*",
-    "https://zycards.nl/*"
+  "description": "Langue préférée, minima par état et historique des prix du JCC Pokémon sur Cardmarket.",
+  "permissions": [
+    "storage"
   ],
-  "web_accessible_resources": [{
-    "resources": ["assets/grading/*.svg"],
-    "matches": ["https://www.cardmarket.com/*", "https://cardmarket.com/*"]
-  }],
-  "background": { "service_worker": "background.js" },
-  "content_scripts": [{
-    "matches": ["https://www.cardmarket.com/*", "https://cardmarket.com/*"],
-    "js": ["core.js", "settings.js", "promos.js", "wants-search.js", "wants-actions.js", "cart-summary.js", "cart-price-trend.js", "buyer-help.js", "duplicate-warnings.js", "shipping-estimator.js", "order-tools.js", "page-tools.js", "spoiler-tools.js", "content.js"],
-    "css": ["styles.css", "enhancements.css"],
-    "run_at": "document_idle"
-  }, {
-    "matches": ["https://kaiofcards.com/*", "https://www.despelvogel.com/*", "https://zycards.nl/*"],
-    "js": ["settings.js", "partner.js"],
-    "run_at": "document_idle"
-  }],
-  "action": { "default_title": "Cardmarket Unifié", "default_popup": "popup.html" },
-  "options_ui": { "page": "options.html", "open_in_tab": true }
+  "icons": {
+    "16": "assets/icons/cardmarket-16.png",
+    "48": "assets/icons/cardmarket-48.png",
+    "128": "assets/icons/cardmarket-128.png"
+  },
+  "optional_host_permissions": [
+    "https://charts.matrastcg.de/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "pokemon.css"
+      ],
+      "matches": [
+        "https://www.cardmarket.com/*",
+        "https://cardmarket.com/*"
+      ]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.cardmarket.com/Pokemon/Products/*",
+        "https://www.cardmarket.com/*/Pokemon/Products/*",
+        "https://cardmarket.com/Pokemon/Products/*",
+        "https://cardmarket.com/*/Pokemon/Products/*"
+      ],
+      "js": [
+        "core.js",
+        "settings.js",
+        "runtime-guard.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Pokémon Cardmarket",
+    "default_icon": {
+      "16": "assets/icons/cardmarket-16.png",
+      "48": "assets/icons/cardmarket-48.png",
+      "128": "assets/icons/cardmarket-128.png"
+    },
+    "default_popup": "popup.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  }
 }

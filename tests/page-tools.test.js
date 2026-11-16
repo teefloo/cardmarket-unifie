@@ -451,16 +451,16 @@ test('recognizes the short Collect Aura alias only with a plausible grading scor
   }
 });
 
-test('ships original local wordmarks for every grading brand without importing source screenshots', () => {
+test('keeps historical grading wordmarks out of the Pokémon release package', () => {
   const brands = ['psa', 'cgc', 'bgs', 'pca', 'ccc', 'ags', 'collect-aura', 'pure-grading', 'ace', 'tag', 'sgc', 'graad', 'mnt', 'ars', 'ksa', 'gma', 'hga'];
   const assetsDir = path.join(__dirname, '..', 'assets', 'grading');
   for (const brand of brands) {
     const svg = fs.readFileSync(path.join(assetsDir, `${brand}.svg`), 'utf8');
-    assert.match(svg, /<svg\b/);
-    assert.match(svg, /<text\b/);
+    assert.match(svg, /<svg/);
+    assert.match(svg, /<text/);
   }
   const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'manifest.json'), 'utf8'));
-  assert.ok(manifest.web_accessible_resources.some((entry) => entry.resources.includes('assets/grading/*.svg')));
+  assert.ok(manifest.web_accessible_resources.every((entry) => !entry.resources.includes('assets/grading/*.svg')));
 });
 
 function fakeNode(classes = [], parentElement = null, tagName = 'DIV') {
@@ -581,10 +581,10 @@ test('rescans a CA 9.5 offer when Cardmarket updates its comment accessibility l
     attributes.textContent = 'MT';
     row.querySelector = (selector) => selector === '.product-comments' ? comments : selector === '.product-attributes' ? attributes : null;
 
-    addOfferAttributeBadges([row]);
+    addOfferAttributeBadges([row], { enabled: true, showOfferAttributes: false });
     assert.equal(attributes.dataset.cmuOfferSignature, '[]');
     const scheduled = [];
-    observeOfferAttributeChanges(addOfferAttributeBadges, {
+    observeOfferAttributeChanges((rows) => addOfferAttributeBadges(rows, { enabled: true, showOfferAttributes: true }), {
       MutationObserverClass: FakeMutationObserver,
       schedule: (callback) => scheduled.push(callback),
       target: table,
@@ -659,7 +659,8 @@ test('renders local brand wordmarks in the attributes cell and replaces stale ba
     attributes.textContent = 'Near Mint';
     row.querySelector = (selector) => selector === '.product-comments' ? comments : selector === '.product-attributes' ? attributes : null;
 
-    addOfferAttributeBadges([row]);
+    const renderGradingBadges = (rows) => addOfferAttributeBadges(rows, { enabled: true, showOfferAttributes: true });
+    renderGradingBadges([row]);
     let badges = attributes.querySelectorAll('.cmu-offer-attribute');
     assert.equal(badges.length, 1);
     assert.match(badges[0].className, /cmu-grade-brand/);
@@ -668,22 +669,22 @@ test('renders local brand wordmarks in the attributes cell and replaces stale ba
     assert.equal(badges[0].childNodes[0].src, 'chrome-extension://test/assets/grading/ccc.svg');
     assert.equal(badges[0].childNodes[1].textContent, '9');
 
-    addOfferAttributeBadges([row]);
+    renderGradingBadges([row]);
     assert.equal(attributes.querySelectorAll('.cmu-offer-attribute').length, 1, 'unchanged row is idempotent');
     comments.textContent = 'AGS 9.5';
-    addOfferAttributeBadges([row]);
+    renderGradingBadges([row]);
     badges = attributes.querySelectorAll('.cmu-offer-attribute');
     assert.equal(badges.length, 1, 'updated comment replaces the previous brand badge');
     assert.equal(badges[0].childNodes[0].alt, 'AGS');
     comments.textContent = 'CA10';
-    addOfferAttributeBadges([row]);
+    renderGradingBadges([row]);
     badges = attributes.querySelectorAll('.cmu-offer-attribute');
     assert.equal(badges.length, 1);
     assert.equal(badges[0].childNodes[0].alt, 'Collect Aura');
     assert.equal(badges[0].childNodes[0].src, 'chrome-extension://test/assets/grading/collect-aura.svg');
     assert.equal(badges[0].attributes['aria-label'], 'Collect Aura, note 10');
     comments.textContent = 'Factory sealed';
-    addOfferAttributeBadges([row]);
+    renderGradingBadges([row]);
     badges = attributes.querySelectorAll('.cmu-offer-attribute');
     assert.equal(badges.length, 1);
     assert.match(badges[0].className, /cmu-sealed/);

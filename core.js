@@ -43,6 +43,33 @@
     return Number.isFinite(price) && price > 0 ? price : null;
   }
 
+  function buildConditionMinima(entries = []) {
+    const conditions = [
+      { code: 'MT', label: 'Mint' },
+      { code: 'NM', label: 'Near Mint' },
+      { code: 'EX', label: 'Excellent' },
+      { code: 'GD', label: 'Good' },
+      { code: 'LP', label: 'Light Played' },
+      { code: 'PL', label: 'Played' },
+      { code: 'PO', label: 'Poor' },
+    ];
+    const minima = new Map();
+    for (const entry of Array.isArray(entries) ? entries : []) {
+      const code = String(entry?.condition || '').toUpperCase();
+      if (!conditions.some((condition) => condition.code === code)) continue;
+      const price = parsePrice(entry.price);
+      if (price === null) continue;
+      const current = minima.get(code);
+      if (!current || price < current.price) minima.set(code, { price, href: String(entry.href || '') });
+    }
+    return conditions.map(({ code, label }) => ({
+      code,
+      label,
+      price: minima.get(code)?.price ?? null,
+      href: minima.get(code)?.href || '',
+    }));
+  }
+
   function normalizeShippingCountryId(value) {
     const id = Number(value);
     return Number.isSafeInteger(id) && SHIPPING_COUNTRIES.some((country) => country.id === id) ? id : null;
@@ -299,7 +326,7 @@
     const label = anchor ? `ancrées au ${anchor}` : 'aucun relevé';
     const price = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const ranges = values.map(({ days, mean, count }) => `${days} j : ${Number.isFinite(mean) ? `${price.format(mean)} €` : '—'} (n=${Number.isInteger(count) && count >= 0 ? count : 0})`);
-    return `Moyennes de prix Matras · ${label}${ranges.length ? ` · ${ranges.join(' · ')}` : ''}`;
+    return `Moyennes de prix · ${label}${ranges.length ? ` · ${ranges.join(' · ')}` : ''}`;
   }
 
   function getChartDateBounds(values) {
@@ -334,11 +361,11 @@
     return finiteValues.length >= 2;
   }
 
-  function getMatrasFailure({ enabled = true, nativeFound = true, productIdFound = true, error = '', hasData = true } = {}) {
+  function getHistoryFailure({ enabled = true, nativeFound = true, productIdFound = true, error = '', hasData = true } = {}) {
     if (!enabled) return 'disabled';
     if (!nativeFound) return 'native-missing';
     if (!productIdFound) return 'id-missing';
-    if (error) return /autorisation réseau manquante|permission/i.test(String(error)) ? 'permission-missing' : 'request-failed';
+    if (error) return /autorisation[^.]{0,80}manquante|permission/i.test(String(error)) ? 'permission-missing' : 'request-failed';
     if (!hasData) return 'empty';
     return null;
   }
@@ -570,7 +597,7 @@
     return queryMatches && languageMatches && conditionMatches;
   }
 
-  const api = { SHIPPING_COUNTRIES, SHIPPING_LOCALES, normalizeShippingCountryId, getShippingCountryFromBackgroundPosition, normalizeShippingLocale, buildShippingCostsUrl, normalizeShippingMethods, selectShippingMethod, shippingCacheKey, isShippingCacheFresh, parsePrice, calculatePrice, selectProfessionalPrice, calculateProfessionalPrice, normalizePriceShortcuts, calculateLotTotal, calculateBulkLotTotal, parseProductPath, parseCardmarketIdentity, getMaveCardKeyFromPath, buildMavePayload, validateMaveRequest, joinVisibleRows, normalizeSellerCountryIds, buildSellerCountryUrl, getChartRange, filterChartSeries, getChartDateBounds, getChartPointAt, calculateChartPriceAverages, formatChartPriceAverages, calculatePriceDeviation, resetChartSurface, hasRenderableChartSeries, getMatrasFailure, sanitizeChartData, hasRecentPurchase, renderSessionTotal, recordSessionCalculation, collectQuickFilterRows, collectQuickFilterRowData, matchesQuickFilters };
+  const api = { SHIPPING_COUNTRIES, SHIPPING_LOCALES, normalizeShippingCountryId, getShippingCountryFromBackgroundPosition, normalizeShippingLocale, buildShippingCostsUrl, normalizeShippingMethods, selectShippingMethod, shippingCacheKey, isShippingCacheFresh, parsePrice, buildConditionMinima, calculatePrice, selectProfessionalPrice, calculateProfessionalPrice, normalizePriceShortcuts, calculateLotTotal, calculateBulkLotTotal, parseProductPath, parseCardmarketIdentity, getMaveCardKeyFromPath, buildMavePayload, validateMaveRequest, joinVisibleRows, normalizeSellerCountryIds, buildSellerCountryUrl, getChartRange, filterChartSeries, getChartDateBounds, getChartPointAt, calculateChartPriceAverages, formatChartPriceAverages, calculatePriceDeviation, resetChartSurface, hasRenderableChartSeries, getHistoryFailure, sanitizeChartData, hasRecentPurchase, renderSessionTotal, recordSessionCalculation, collectQuickFilterRows, collectQuickFilterRowData, matchesQuickFilters };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.CardmarketCore = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

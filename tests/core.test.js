@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parsePrice, calculatePrice, parseProductPath, parseCardmarketIdentity, getMaveCardKeyFromPath, buildMavePayload, validateMaveRequest, joinVisibleRows, getChartRange, filterChartSeries, getChartDateBounds, getChartPointAt, calculateChartPriceAverages, formatChartPriceAverages, calculatePriceDeviation, resetChartSurface, hasRenderableChartSeries, getMatrasFailure, sanitizeChartData, hasRecentPurchase, recordSessionCalculation, collectQuickFilterRows, collectQuickFilterRowData, matchesQuickFilters, normalizeSellerCountryIds, buildSellerCountryUrl, getShippingCountryFromBackgroundPosition, normalizeShippingMethods, selectShippingMethod, buildShippingCostsUrl, shippingCacheKey, isShippingCacheFresh } = require('../core.js');
+const { parsePrice, buildConditionMinima, calculatePrice, parseProductPath, parseCardmarketIdentity, getMaveCardKeyFromPath, buildMavePayload, validateMaveRequest, joinVisibleRows, getChartRange, filterChartSeries, getChartDateBounds, getChartPointAt, calculateChartPriceAverages, formatChartPriceAverages, calculatePriceDeviation, resetChartSurface, hasRenderableChartSeries, getHistoryFailure, sanitizeChartData, hasRecentPurchase, recordSessionCalculation, collectQuickFilterRows, collectQuickFilterRowData, matchesQuickFilters, normalizeSellerCountryIds, buildSellerCountryUrl, getShippingCountryFromBackgroundPosition, normalizeShippingMethods, selectShippingMethod, buildShippingCostsUrl, shippingCacheKey, isShippingCacheFresh } = require('../core.js');
 
 test('parses Cardmarket decimal prices in euros', () => {
   assert.equal(parsePrice('1,25 €'), 1.25);
@@ -83,12 +83,12 @@ test('reports an em dash and zero sample count when Matras has no finite price o
     { days: 7, start: null, end: null, mean: null, count: 0 },
     { days: 30, start: null, end: null, mean: null, count: 0 },
   ]);
-  assert.equal(formatChartPriceAverages(averages), 'Moyennes de prix Matras · aucun relevé · 1 j : — (n=0) · 7 j : — (n=0) · 30 j : — (n=0)');
+  assert.equal(formatChartPriceAverages(averages), 'Moyennes de prix · aucun relevé · 1 j : — (n=0) · 7 j : — (n=0) · 30 j : — (n=0)');
 });
 
 test('formats Matras averages with the observation date and finite-observation count', () => {
   const averages = calculateChartPriceAverages([['2026-11-01', 1.2], ['2026-11-01', 2.8]]);
-  assert.equal(formatChartPriceAverages(averages), 'Moyennes de prix Matras · ancrées au 2026-11-01 · 1 j : 2,00 € (n=2) · 7 j : 2,00 € (n=2) · 30 j : 2,00 € (n=2)');
+  assert.equal(formatChartPriceAverages(averages), 'Moyennes de prix · ancrées au 2026-11-01 · 1 j : 2,00 € (n=2) · 7 j : 2,00 € (n=2) · 30 j : 2,00 € (n=2)');
 });
 
 test('detects a Cardmarket From price more than ten percent above the three latest positive chart observations', () => {
@@ -156,13 +156,13 @@ test('allows drawing a multi-point Matras price response after the chart normali
 });
 
 test('classifies every Matras early-exit branch for visible page diagnostics', () => {
-  assert.equal(getMatrasFailure({ enabled: false }), 'disabled');
-  assert.equal(getMatrasFailure({ nativeFound: false }), 'native-missing');
-  assert.equal(getMatrasFailure({ productIdFound: false }), 'id-missing');
-  assert.equal(getMatrasFailure({ error: 'Autorisation réseau manquante. Active-la dans les options.' }), 'permission-missing');
-  assert.equal(getMatrasFailure({ error: 'HTTP 503' }), 'request-failed');
-  assert.equal(getMatrasFailure({ hasData: false }), 'empty');
-  assert.equal(getMatrasFailure({}), null);
+  assert.equal(getHistoryFailure({ enabled: false }), 'disabled');
+  assert.equal(getHistoryFailure({ nativeFound: false }), 'native-missing');
+  assert.equal(getHistoryFailure({ productIdFound: false }), 'id-missing');
+  assert.equal(getHistoryFailure({ error: 'Autorisation du service d’historique manquante.' }), 'permission-missing');
+  assert.equal(getHistoryFailure({ error: 'HTTP 503' }), 'request-failed');
+  assert.equal(getHistoryFailure({ hasData: false }), 'empty');
+  assert.equal(getHistoryFailure({}), null);
 });
 
 test('shares only valid numeric chart points with no labels or account data', () => {
