@@ -2,40 +2,33 @@
   "manifest_version": 3,
   "name": "Pokémon Cardmarket",
   "version": "1.0.0",
-  "description": "Langue préférée, minima par état et historique des prix du JCC Pokémon sur Cardmarket.",
+  "description": "Langue et minima par état, aperçu et prix mini des listes Wants, historique pour les cartes Pokémon sur Cardmarket.",
   "permissions": ["storage"],
   "icons": {
-    "16": "assets/icons/cardmarket-16.png",
-    "48": "assets/icons/cardmarket-48.png",
-    "128": "assets/icons/cardmarket-128.png"
+    "16": "assets/store/chrome-icon-16.png",
+    "48": "assets/store/chrome-icon-48.png",
+    "128": "assets/store/chrome-icon-128.png"
   },
   "optional_host_permissions": [
     "https://charts.matrastcg.de/*"
   ],
   "web_accessible_resources": [{
     "resources": [
-      "pokemon.css",
-      "assets/grading/logos/ace.svg",
-      "assets/grading/logos/ags.svg",
-      "assets/grading/logos/ars.png",
-      "assets/grading/logos/bgs.jpg",
-      "assets/grading/logos/ccc.svg",
-      "assets/grading/logos/cgc.png",
-      "assets/grading/logos/collect-aura.png",
-      "assets/grading/logos/gma.png",
-      "assets/grading/logos/graad.png",
-      "assets/grading/logos/hga.svg",
-      "assets/grading/logos/ksa.jpg",
-      "assets/grading/logos/mnt.png",
-      "assets/grading/logos/pca.png",
-      "assets/grading/logos/psa.jpg",
-      "assets/grading/logos/pure-grading.svg",
-      "assets/grading/logos/sgc.png",
-      "assets/grading/logos/tag.png"
+      "pokemon.css"
     ],
     "matches": [
-      "https://www.cardmarket.com/*",
-      "https://cardmarket.com/*"
+      "https://www.cardmarket.com/Pokemon/Products/*",
+      "https://www.cardmarket.com/*/Pokemon/Products/*",
+      "https://www.cardmarket.com/Pokemon/Wants",
+      "https://www.cardmarket.com/Pokemon/Wants/*",
+      "https://www.cardmarket.com/*/Pokemon/Wants",
+      "https://www.cardmarket.com/*/Pokemon/Wants/*",
+      "https://cardmarket.com/Pokemon/Products/*",
+      "https://cardmarket.com/*/Pokemon/Products/*",
+      "https://cardmarket.com/Pokemon/Wants",
+      "https://cardmarket.com/Pokemon/Wants/*",
+      "https://cardmarket.com/*/Pokemon/Wants",
+      "https://cardmarket.com/*/Pokemon/Wants/*"
     ]
   }],
   "background": { "service_worker": "background.js" },
@@ -65,9 +58,9 @@
   "action": {
     "default_title": "Pokémon Cardmarket",
     "default_icon": {
-      "16": "assets/icons/cardmarket-16.png",
-      "48": "assets/icons/cardmarket-48.png",
-      "128": "assets/icons/cardmarket-128.png"
+      "16": "assets/store/chrome-icon-16.png",
+      "48": "assets/store/chrome-icon-48.png",
+      "128": "assets/store/chrome-icon-128.png"
     },
     "default_popup": "popup.html"
   },

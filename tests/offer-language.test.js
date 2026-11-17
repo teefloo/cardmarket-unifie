@@ -126,8 +126,18 @@ test('options expose a single preference and the content entry is gated before U
     'https://cardmarket.com/*/Pokemon/Products/*',
   ]);
   assert.deepEqual(manifest.web_accessible_resources[0].matches, [
-    'https://www.cardmarket.com/*',
-    'https://cardmarket.com/*',
+    'https://www.cardmarket.com/Pokemon/Products/*',
+    'https://www.cardmarket.com/*/Pokemon/Products/*',
+    'https://www.cardmarket.com/Pokemon/Wants',
+    'https://www.cardmarket.com/Pokemon/Wants/*',
+    'https://www.cardmarket.com/*/Pokemon/Wants',
+    'https://www.cardmarket.com/*/Pokemon/Wants/*',
+    'https://cardmarket.com/Pokemon/Products/*',
+    'https://cardmarket.com/*/Pokemon/Products/*',
+    'https://cardmarket.com/Pokemon/Wants',
+    'https://cardmarket.com/Pokemon/Wants/*',
+    'https://cardmarket.com/*/Pokemon/Wants',
+    'https://cardmarket.com/*/Pokemon/Wants/*',
   ]);
   assert.deepEqual(script.js, ['core.js', 'settings.js', 'runtime-guard.js', 'pokemon-offers.js', 'content.js']);
   assert.equal(script.css, undefined, 'styles are added only after the challenge guard passes');

@@ -22,48 +22,26 @@ test('recognizes grading companies and scores with accent and decimal variants',
   ]);
 });
 
-test('declares only bundled original grading logo assets', () => {
-  const assets = Offers.GRADING_LOGO_ASSETS;
-  assert.deepEqual(assets, {
-    'collect-aura': 'assets/grading/logos/collect-aura.png',
-    'pure-grading': 'assets/grading/logos/pure-grading.svg',
-    bgs: 'assets/grading/logos/bgs.jpg',
-    psa: 'assets/grading/logos/psa.jpg',
-    cgc: 'assets/grading/logos/cgc.png',
-    pca: 'assets/grading/logos/pca.png',
-    ccc: 'assets/grading/logos/ccc.svg',
-    ags: 'assets/grading/logos/ags.svg',
-    ace: 'assets/grading/logos/ace.svg',
-    tag: 'assets/grading/logos/tag.png',
-    sgc: 'assets/grading/logos/sgc.png',
-    graad: 'assets/grading/logos/graad.png',
-    mnt: 'assets/grading/logos/mnt.png',
-    ars: 'assets/grading/logos/ars.png',
-    ksa: 'assets/grading/logos/ksa.jpg',
-    gma: 'assets/grading/logos/gma.png',
-    hga: 'assets/grading/logos/hga.svg',
-  });
+test('does not bundle grading logos without confirmed licenses', () => {
+  assert.equal(Offers.GRADING_LOGO_ASSETS, undefined);
   const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'manifest.json'), 'utf8'));
   const resources = new Set(manifest.web_accessible_resources.flatMap((entry) => entry.resources));
   const packageScript = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'package-webstore.mjs'), 'utf8');
   const provenance = fs.readFileSync(path.join(__dirname, '..', 'assets', 'grading', 'PROVENANCE.md'), 'utf8');
-  for (const [brand, asset] of Object.entries(assets)) {
-    const brandName = Offers.GRADING_BRANDS.find((entry) => entry.id === brand).name;
-    assert.match(provenance, new RegExp(`\\| ${brandName} \\|`, 'i'), `${brand} provenance row`);
-    if (!asset) continue;
-    assert.ok(fs.existsSync(path.join(__dirname, '..', asset)), `${brand} original asset exists`);
-    assert.ok(resources.has(asset), `${brand} logo is web accessible`);
-    assert.ok(packageScript.includes(`'${asset}'`), `${brand} logo is included in the package`);
+  const removedLogos = [
+    'psa.jpg', 'bgs.jpg', 'cgc.png', 'collect-aura.png', 'pure-grading.svg', 'ccc.svg', 'ags.svg', 'ace.svg',
+    'tag.png', 'graad.png', 'mnt.png', 'ars.png', 'ksa.jpg', 'gma.png', 'hga.svg', 'pca.png', 'sgc.png',
+  ];
+  for (const filename of removedLogos) {
+    const asset = `assets/grading/logos/${filename}`;
+    assert.ok(!fs.existsSync(path.join(__dirname, '..', asset)), `${asset} was removed from the source tree`);
+    assert.ok(!resources.has(asset), `${asset} is not web accessible`);
+    assert.ok(!packageScript.includes(`'${asset}'`), `${asset} is not copied into the package`);
+    assert.ok(provenance.includes(`logos/${filename}`), `${filename} removal is documented`);
   }
-  assert.match(provenance, /aucune licence d’utilisation n’est confirmée/i);
-  assert.ok(!resources.has('assets/grading/pca.svg'));
-  assert.ok(!resources.has('assets/grading/sgc.svg'));
-  const pcaLogo = fs.readFileSync(path.join(__dirname, '..', assets.pca));
-  assert.deepEqual([pcaLogo.readUInt32BE(16), pcaLogo.readUInt32BE(20)], [440, 143], 'PCA uses the full uncropped source image');
-  const sgcLogo = fs.readFileSync(path.join(__dirname, '..', assets.sgc));
-  assert.deepEqual([sgcLogo.readUInt32BE(16), sgcLogo.readUInt32BE(20)], [556, 385], 'SGC uses the official image, not its favicon');
-  const gmaLogo = fs.readFileSync(path.join(__dirname, '..', assets.gma));
-  assert.deepEqual([gmaLogo.readUInt32BE(16), gmaLogo.readUInt32BE(20)], [156, 72], 'GMA uses the documented crop from the supplied source image');
+  assert.match(provenance, /aucune licence d’utilisation n’a pu être confirmée/i);
+  assert.deepEqual([...resources], ['pokemon.css']);
+  assert.match(packageScript, /pokemon-offers\.js/);
 });
 
 test('rejects negated, hypothetical, and questioned tags', () => {
@@ -142,46 +120,44 @@ test('scans product information and comment, then adds tags after the language f
     ? attributes.children.find((child) => child.className === 'cmu-offer-tags') || null
     : queryRow(selector);
   const documentRef = { createElement: element };
-  const getURL = (asset) => `chrome-extension://extension-id/${asset}`;
-
   assert.equal(Offers.readOfferText(row), 'Carte Pokémon scelé sous blister · PSA 9,5');
-  assert.equal(Offers.renderOfferTags([row], { documentRef, getURL }), 1);
+  assert.equal(Offers.renderOfferTags([row], { documentRef }), 1);
   const tags = attributes.children.find((child) => child.className === 'cmu-offer-tags');
   assert.ok(tags, 'a tag group is inserted beside the condition code');
   assert.equal(attributes.children.indexOf(tags), attributes.children.indexOf(languageFlag) + 1);
   assert.equal(tags.children.length, 2);
   assert.equal(tags.children[0].textContent, 'SCELLÉ');
-  assert.equal(tags.children[1].children[0].src, `chrome-extension://extension-id/assets/grading/logos/psa.jpg`);
-  assert.equal(tags.children[1].children[1].textContent, '9.5');
-  assert.equal(Offers.renderOfferTags([row], { documentRef, getURL }), 0, 'unchanged rows are not re-rendered');
+  assert.equal(tags.children[1].textContent, 'PSA 9.5');
+  assert.equal(tags.children[1].children.length, 0, 'grading details are plain text, without an image element');
+  assert.equal(Offers.renderOfferTags([row], { documentRef }), 0, 'unchanged rows are not re-rendered');
 
   comments.textContent = 'PSA 10?';
-  assert.equal(Offers.renderOfferTags([row], { documentRef, getURL }), 1);
+  assert.equal(Offers.renderOfferTags([row], { documentRef }), 1);
   const updated = attributes.children.find((child) => child.className === 'cmu-offer-tags');
   assert.equal(updated.children.length, 1, 'uncertain grades are omitted while product details remain scannable');
   assert.equal(updated.children[0].textContent, 'SCELLÉ');
 
   languageFlag.remove();
   delete row.dataset.cmuOfferTagsSignature;
-  assert.equal(Offers.renderOfferTags([row], { documentRef, getURL }), 1);
+  assert.equal(Offers.renderOfferTags([row], { documentRef }), 1);
   const fallback = attributes.children.find((child) => child.className === 'cmu-offer-tags');
   assert.equal(attributes.children.indexOf(fallback), attributes.children.indexOf(condition) + 1, 'missing language marker falls back to immediately after the condition');
 
   comments.textContent = 'SGC 9';
   delete row.dataset.cmuOfferTagsSignature;
-  assert.equal(Offers.renderOfferTags([row], { documentRef, getURL }), 1);
+  assert.equal(Offers.renderOfferTags([row], { documentRef }), 1);
   const sgcBadge = attributes.children.find((child) => child.className === 'cmu-offer-tags')
     .children.find((child) => child.className.includes('--grade'));
-  assert.equal(sgcBadge.children[0].className, 'cmu-offer-grade-logo');
-  assert.equal(sgcBadge.children[0].src, `chrome-extension://extension-id/assets/grading/logos/sgc.png`);
+  assert.equal(sgcBadge.textContent, 'SGC 9');
+  assert.equal(sgcBadge.children.length, 0);
 
   comments.textContent = 'PCA 9';
   delete row.dataset.cmuOfferTagsSignature;
-  assert.equal(Offers.renderOfferTags([row], { documentRef, getURL }), 1);
+  assert.equal(Offers.renderOfferTags([row], { documentRef }), 1);
   const pcaBadge = attributes.children.find((child) => child.className === 'cmu-offer-tags')
     .children.find((child) => child.className.includes('--grade'));
-  assert.equal(pcaBadge.children[0].className, 'cmu-offer-grade-logo');
-  assert.equal(pcaBadge.children[0].src, `chrome-extension://extension-id/assets/grading/logos/pca.png`);
+  assert.equal(pcaBadge.textContent, 'PCA 9');
+  assert.equal(pcaBadge.children.length, 0);
 });
 
 test('installs offer tags only on supported Pokémon product details', () => {

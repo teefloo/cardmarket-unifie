@@ -738,20 +738,7 @@
         indicator.title = badge.type === 'grade' ? `Carte gradée · ${badge.label}` : badge.type === 'sealed' ? 'Produit scellé explicitement mentionné' : `${badge.label} mentionnée dans le commentaire`;
         indicator.setAttribute('aria-label', badge.type === 'grade' ? `${badge.brandName}${badge.grade ? `, note ${badge.grade}` : ''}` : badge.type === 'sealed' ? 'Scellé explicitement mentionné' : `${badge.label} mentionnée dans le commentaire`);
         if (badge.type === 'grade') {
-          const image = document.createElement('img');
-          image.className = 'cmu-grade-logo';
-          image.src = root.chrome?.runtime?.getURL
-            ? root.chrome.runtime.getURL(`assets/grading/${badge.brand}.svg`)
-            : `assets/grading/${badge.brand}.svg`;
-          image.alt = badge.brandName;
-          image.decoding = 'async';
-          indicator.append(image);
-          if (badge.grade) {
-            const grade = document.createElement('span');
-            grade.className = 'cmu-grade-score';
-            grade.textContent = badge.grade;
-            indicator.append(grade);
-          }
+          indicator.textContent = badge.label;
         } else if (badge.type === 'ball') {
           const icon = document.createElement('span');
           icon.className = `cmu-poke-ball-icon cmu-poke-ball-icon--${badge.ball}`;

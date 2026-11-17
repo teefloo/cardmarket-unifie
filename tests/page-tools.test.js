@@ -451,19 +451,14 @@ test('recognizes the short Collect Aura alias only with a plausible grading scor
   }
 });
 
-test('packages only the declared local original grading logos for Pokémon offers', () => {
+test('does not expose or package grading logos without confirmed licenses', () => {
   const offers = require('../pokemon-offers.js');
   const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'manifest.json'), 'utf8'));
   const resources = manifest.web_accessible_resources.flatMap((entry) => entry.resources);
   const packageScript = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'package-webstore.mjs'), 'utf8');
-  for (const [brand, asset] of Object.entries(offers.GRADING_LOGO_ASSETS)) {
-    if (!asset) continue;
-    assert.ok(fs.existsSync(path.join(__dirname, '..', asset)), `${brand} original logo exists`);
-    assert.ok(resources.includes(asset), `${brand} original logo is explicitly web accessible`);
-    assert.ok(packageScript.includes(`'${asset}'`), `${brand} original logo is packaged`);
-  }
-  assert.equal(offers.GRADING_LOGO_ASSETS.pca, 'assets/grading/logos/pca.png', 'PCA uses the uncropped full-size logo');
-  assert.equal(offers.GRADING_LOGO_ASSETS.sgc, 'assets/grading/logos/sgc.png', 'SGC uses the full logo rather than its favicon');
+  assert.equal(offers.GRADING_LOGO_ASSETS, undefined);
+  assert.ok(!resources.some((resource) => resource.startsWith('assets/grading/logos/')));
+  assert.doesNotMatch(packageScript, /assets\/grading\/logos\//);
   assert.ok(!resources.some((resource) => /^assets\/grading\/(?!logos\/).+\.svg$/.test(resource)), 'locally drawn legacy wordmarks are not web accessible');
   assert.match(packageScript, /pokemon-offers\.js/);
 });
@@ -603,8 +598,8 @@ test('rescans a CA 9.5 offer when Cardmarket updates its comment accessibility l
     scheduled.shift()();
     const badge = attributes.querySelectorAll('.cmu-grade-brand')[0];
     assert.ok(badge, 'dynamic comment gets a grading brand badge');
-    assert.equal(badge.childNodes[0].alt, 'Collect Aura');
-    assert.equal(badge.childNodes[1].textContent, '9.5');
+    assert.equal(badge.textContent, 'Collect Aura 9.5');
+    assert.equal(badge.childNodes.some((child) => child.tagName === 'IMG'), false, 'grading badges contain text rather than logos');
   } finally {
     for (const key of ['document', 'location', 'chrome']) {
       if (previous[key] === undefined) delete global[key];
@@ -613,7 +608,7 @@ test('rescans a CA 9.5 offer when Cardmarket updates its comment accessibility l
   }
 });
 
-test('renders local brand wordmarks in the attributes cell and replaces stale badges without duplicates', () => {
+test('renders grading names and notes as text in the attributes cell and replaces stale badges without duplicates', () => {
   const previous = { document: global.document, location: global.location, chrome: global.chrome };
   function element(tagName) {
     const result = {
@@ -670,9 +665,8 @@ test('renders local brand wordmarks in the attributes cell and replaces stale ba
     assert.equal(badges.length, 1);
     assert.match(badges[0].className, /cmu-grade-brand/);
     assert.equal(badges[0].attributes['aria-label'], 'CCC, note 9');
-    assert.equal(badges[0].childNodes[0].alt, 'CCC');
-    assert.equal(badges[0].childNodes[0].src, 'chrome-extension://test/assets/grading/ccc.svg');
-    assert.equal(badges[0].childNodes[1].textContent, '9');
+    assert.equal(badges[0].textContent, 'CCC 9');
+    assert.equal(badges[0].childNodes.some((child) => child.tagName === 'IMG'), false);
 
     renderGradingBadges([row]);
     assert.equal(attributes.querySelectorAll('.cmu-offer-attribute').length, 1, 'unchanged row is idempotent');
@@ -680,13 +674,12 @@ test('renders local brand wordmarks in the attributes cell and replaces stale ba
     renderGradingBadges([row]);
     badges = attributes.querySelectorAll('.cmu-offer-attribute');
     assert.equal(badges.length, 1, 'updated comment replaces the previous brand badge');
-    assert.equal(badges[0].childNodes[0].alt, 'AGS');
+    assert.equal(badges[0].textContent, 'AGS 9.5');
     comments.textContent = 'CA10';
     renderGradingBadges([row]);
     badges = attributes.querySelectorAll('.cmu-offer-attribute');
     assert.equal(badges.length, 1);
-    assert.equal(badges[0].childNodes[0].alt, 'Collect Aura');
-    assert.equal(badges[0].childNodes[0].src, 'chrome-extension://test/assets/grading/collect-aura.svg');
+    assert.equal(badges[0].textContent, 'Collect Aura 10');
     assert.equal(badges[0].attributes['aria-label'], 'Collect Aura, note 10');
     comments.textContent = 'Factory sealed';
     renderGradingBadges([row]);
@@ -702,7 +695,7 @@ test('renders local brand wordmarks in the attributes cell and replaces stale ba
   }
 });
 
-test('renders every mapped grading wordmark in the offer-attributes cell and applies its individual gate', () => {
+test('renders every detected grading company and note as text and applies its individual gate', () => {
   const previous = { document: global.document, location: global.location, chrome: global.chrome };
   function element(tagName) {
     const result = {
@@ -724,20 +717,20 @@ test('renders every mapped grading wordmark in the offer-attributes cell and app
     const attributes = element('div'); attributes.className = 'product-attributes'; attributes.textContent = 'Near Mint';
     const row = { querySelector(selector) { return selector === '.product-comments' ? comments : selector === '.product-attributes' ? attributes : null; } };
     const brands = [
-      ['PCA 9', 'pca', 'PCA'], ['PSA 10', 'psa', 'PSA'], ['CCC 9', 'ccc', 'CCC'], ['CGC 9.5', 'cgc', 'CGC'],
-      ['BGS 9', 'bgs', 'BGS'], ['AGS 9.5', 'ags', 'AGS'], ['Collect Aura 9.5', 'collect-aura', 'Collect Aura'],
-      ['Pure Grading 10', 'pure-grading', 'Pure Grading'], ['ACE 9', 'ace', 'ACE'], ['TAG 10', 'tag', 'TAG'],
-      ['SGC 9', 'sgc', 'SGC'], ['GRAAD 9', 'graad', 'GRAAD'], ['MNT 9', 'mnt', 'MNT'], ['ARS 9', 'ars', 'ARS'],
-      ['KSA 9', 'ksa', 'KSA'], ['GMA 9', 'gma', 'GMA'], ['HGA 9', 'hga', 'HGA'],
+      ['PCA 9', 'PCA'], ['PSA 10', 'PSA'], ['CCC 9', 'CCC'], ['CGC 9.5', 'CGC'],
+      ['BGS 9', 'BGS'], ['AGS 9.5', 'AGS'], ['Collect Aura 9.5', 'Collect Aura'],
+      ['Pure Grading 10', 'Pure Grading'], ['ACE 9', 'ACE'], ['TAG 10', 'TAG'],
+      ['SGC 9', 'SGC'], ['GRAAD 9', 'GRAAD'], ['MNT 9', 'MNT'], ['ARS 9', 'ARS'],
+      ['KSA 9', 'KSA'], ['GMA 9', 'GMA'], ['HGA 9', 'HGA'],
     ];
-    for (const [claim, asset, alt] of brands) {
+    for (const [claim, name] of brands) {
       comments.textContent = claim;
       addOfferAttributeBadges([row], { enabled: true, showOfferAttributes: true, showPokeMasterBallIndicators: false });
       const badge = attributes.querySelectorAll('.cmu-offer-attribute')[0];
       assert.ok(badge?.className.includes('cmu-grade-brand'), `${claim} badge is in the offer-attributes cell`);
-      assert.equal(badge.childNodes[0].src, `chrome-extension://test/assets/grading/${asset}.svg`);
-      assert.equal(badge.childNodes[0].alt, alt);
-      assert.equal(badge.attributes['aria-label'].startsWith(alt), true);
+      assert.equal(badge.textContent, claim, `${name} and its note are visible text`);
+      assert.equal(badge.childNodes.some((child) => child.tagName === 'IMG'), false, `${name} has no logo image`);
+      assert.equal(badge.attributes['aria-label'].startsWith(name), true);
       addOfferAttributeBadges([row], { enabled: true, showOfferAttributes: false, showPokeMasterBallIndicators: false });
       assert.equal(attributes.querySelectorAll('.cmu-offer-attribute').length, 0, `${claim} is removed with its flag off`);
     }
