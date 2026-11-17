@@ -14,6 +14,7 @@ const packageFiles = [
   'runtime-guard.js',
   'pokemon-offers.js',
   'content.js',
+  'wants-prices.js',
   'pokemon.css',
   'popup.html',
   'popup.js',

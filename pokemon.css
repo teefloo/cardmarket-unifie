@@ -46,6 +46,63 @@
   color: var(--cmu-primary, currentColor);
 }
 
+#WantsListTable .cmu-wants-image-heading,
+#WantsListTable .cmu-wants-image-cell {
+  width: 40px;
+  min-width: 40px;
+  max-width: 40px;
+  padding: 2px 3px !important;
+  text-align: center;
+  vertical-align: middle;
+}
+
+#WantsListTable .cmu-wants-preview {
+  display: inline-flex;
+  width: 34px;
+  height: 46px;
+  flex: 0 0 34px;
+  align-items: center;
+  justify-content: center;
+}
+
+#WantsListTable .cmu-wants-preview[hidden] {
+  display: none;
+}
+
+#WantsListTable .cmu-wants-preview img {
+  display: block;
+  width: 34px;
+  height: 46px;
+  max-width: 34px;
+  max-height: 46px;
+  object-fit: contain;
+}
+
+#WantsListTable .cmu-wants-min-price,
+#WantsListTable .cmu-wants-min-price-heading {
+  width: 82px;
+  min-width: 75px;
+  max-width: 90px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.cmu-wants-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 720px) {
+  #WantsListTable {
+    min-width: 680px;
+  }
+
+  #WantsListTable td.name {
+    white-space: nowrap;
+  }
+}
+
 .cmu-offer-tags {
   display: inline-flex;
   align-items: center;
