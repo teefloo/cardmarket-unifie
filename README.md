@@ -15,9 +15,11 @@ Extension Chrome Manifest V3 pour le JCC Pokémon sur Cardmarket. Elle applique 
 
 ## Données et autorisations
 
-Le réglage de langue et les options d’affichage sont enregistrés dans `chrome.storage.local`. La page de confidentialité locale décrit les données lues et le seul service externe facultatif. L’extension ne charge pas de bibliothèque distante et n’envoie aucune offre à un service de suivi.
+Le réglage de langue et les options d’affichage sont enregistrés dans `chrome.storage.local`. La page de confidentialité locale décrit les données lues et leurs destinataires. L’extension ne charge pas de bibliothèque distante et n’envoie aucune offre à un service de suivi.
 
-Le seul accès réseau facultatif externe est `charts.matrastcg.de`, utilisé sans cookies pour obtenir l’historique d’une fiche Pokémon Singles après autorisation dans Réglages. Les lectures des fiches produit et des paramètres Wants restent sur Cardmarket et utilisent la session normale du navigateur. Les autres pages et domaines ne reçoivent pas de script de contenu.
+Les lectures des fiches produit et des paramètres Wants restent sur Cardmarket et utilisent la session normale du navigateur; les aperçus chargent les images depuis l’hôte d’images Cardmarket. Le réglage d’affichage de l’historique est activé initialement, mais le service facultatif `charts.matrastcg.de` ne reçoit aucune requête sans l’autorisation d’hôte que l’utilisateur accorde dans Réglages. Cette requête d’historique n’inclut pas les cookies Cardmarket. Les autres pages et domaines ne reçoivent pas de script de contenu.
+
+L’extension respecte la politique des données utilisateur du Chrome Web Store, y compris ses exigences « Limited Use » : le contenu des pages et des listes sert aux fonctions décrites, n’est pas utilisé pour la publicité et n’est pas communiqué au développeur.
 
 ## Installation de développement
 

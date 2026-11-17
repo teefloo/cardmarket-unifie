@@ -18,7 +18,7 @@ Dans vos listes Wants, les cartes s’affichent en petit aperçu, avec leur nom 
 
 Sur les fiches produit Pokémon, l’extension affiche le prix minimum des offres visibles par état et applique votre langue préférée au filtre natif du site. Elle signale aussi les mentions explicites de cartes scellées ou gradées. Un graphique d’historique est disponible en option sur les fiches Singles.
 
-Les listes, critères et offres sont traités dans votre navigateur. Les réglages restent dans le stockage local de Chrome. L’historique est désactivé par défaut; si vous l’activez, l’extension envoie uniquement l’identifiant et le chemin public d’une fiche à `charts.matrastcg.de`, sans cookie Cardmarket ni donnée de compte.
+Les listes, critères et offres sont traités dans votre navigateur. Les réglages restent dans le stockage local de Chrome. Pour calculer les prix mini et afficher les aperçus, l’extension consulte les fiches produit et, si nécessaire, les paramètres Wants sur Cardmarket avec la session normale du navigateur; les images proviennent de l’hôte d’images Cardmarket. Le réglage d’affichage de l’historique est actif initialement, mais aucune requête à `charts.matrastcg.de` n’est envoyée sans l’autorisation facultative accordée par l’utilisateur dans Réglages. Après autorisation, cette requête contient le numéro public du produit, le jeu Pokémon et le chemin public de sa fiche, sans cookie Cardmarket ni donnée de compte.
 
 L’extension n’achète rien, n’ajoute aucun article au panier et ne modifie pas les offres. Elle n’est affiliée ni à Cardmarket ni à The Pokémon Company.
 
@@ -36,13 +36,26 @@ L’extension n’achète rien, n’ajoute aucun article au panier et ne modifie
 
 ## Déclaration des pratiques de confidentialité
 
-Déclarer les types de données traités même s’ils restent sur l’appareil :
+Déclarer les catégories traitées même si les données des pages et listes restent dans le navigateur :
 
-- **Contenu de site Web** : informations produit et offres Cardmarket, prix, langue, état et images de cartes.
-- **Activité de navigation** : chemin et identifiant de la fiche Pokémon Cardmarket ouverte, nécessaires pour détecter la page et afficher ses données.
-- **Contenu généré par l’utilisateur** : choix de cartes et critères de langue/condition dans les listes Wants, traités localement pour calculer le prix mini.
+- **Contenu de site Web** : noms et identifiants de produits, URL d’image, offres visibles, prix, langue et état; critères de liste Wants affichés sur Cardmarket.
+- **Activité de navigation** : chemin de la fiche Pokémon Cardmarket ouverte, nécessaire pour reconnaître la page et, si l’accès facultatif est autorisé, demander l’historique du produit.
+- **Contenu généré par l’utilisateur** : cartes et critères de langue/condition enregistrés dans une liste Wants, traités localement pour calculer le prix mini. Ils ne sont pas envoyés au service d’historique.
 
-Indiquer que ces données servent uniquement aux fonctions décrites et ne sont ni vendues ni utilisées pour la publicité. Elles ne sont pas transmises au développeur. La seule transmission externe est la requête facultative d’historique à `charts.matrastcg.de`; les utilisateurs doivent recevoir l’information de Limited Use et les engagements correspondants doivent être certifiés dans le tableau de bord.
+Destinataires et traitement à déclarer :
+
+- **Stockage local Chrome** : langue et réglages d’affichage; une migration peut lire les préférences de versions antérieures et supprimer les réglages devenus obsolètes. Les données de page et de liste ne sont pas persistées par l’extension.
+- **Cardmarket et son hôte d’images `product-images.s3.cardmarket.com`** : requêtes nécessaires pour lire les fiches produit, paramètres Wants et miniatures, avec la session normale du navigateur.
+- **`charts.matrastcg.de`** : uniquement après autorisation facultative, reçoit le numéro public du produit, le jeu Pokémon et le chemin public de la fiche pour retourner le graphique. Le service reçoit aussi les métadonnées réseau usuelles, dont l’adresse IP. La requête utilise `credentials: omit`.
+- **Éditeur** : ne reçoit ni ne consulte le contenu des pages, offres ou listes. Aucun service d’analyse, de publicité ou de suivi n’est intégré.
+
+### Déclaration Limited Use
+
+Faire figurer cette déclaration affirmative sur la notice de confidentialité publique liée dans le tableau de bord, et conserver une déclaration cohérente dans la notice locale :
+
+> Nous confirmons que l’utilisation des données par cette extension respecte la politique des données utilisateur du Chrome Web Store, y compris ses exigences « Limited Use » (« utilisation limitée »). Les données ne sont utilisées que pour fournir les fonctions décrites, ne sont pas vendues ou utilisées pour la publicité personnalisée, et ne sont transférées qu’à Cardmarket pour les requêtes nécessaires ou à `charts.matrastcg.de` pour l’historique après autorisation. Le développeur ne reçoit ni ne consulte le contenu des pages, offres ou listes; aucun accès humain à ces contenus n’est prévu.
+
+Vérifier avant soumission que les catégories et destinataires du tableau de bord correspondent à ces déclarations. La politique publique hébergée doit être mise à jour avec le contenu final de `PRIVACY.md`; ce dépôt ne met pas à jour la copie publique.
 
 ## Autorisations
 

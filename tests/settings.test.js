@@ -91,11 +91,19 @@ test('manifest limits injection and optional network access to the focused featu
   assert.doesNotMatch(JSON.stringify(manifest), /Mave|help\.cardmarket|kaiofcards|despelvogel|zycards/);
 });
 
-test('local privacy notice accurately describes the only optional request', () => {
+test('privacy notices disclose Limited Use and the optional request accurately', () => {
   const privacy = fs.readFileSync(path.join(__dirname, '..', 'privacy.html'), 'utf8');
+  const publicPolicySource = fs.readFileSync(path.join(__dirname, '..', 'PRIVACY.md'), 'utf8');
   assert.match(privacy, /chrome\.storage\.local/);
   assert.match(privacy, /charts\.matrastcg\.de/);
-  assert.match(privacy, /ni cookies/);
+  assert.match(privacy, /n’inclut pas de cookie Cardmarket/);
   assert.match(privacy, /adresse IP/);
+  assert.match(privacy, /respecte la politique des données utilisateur du Chrome Web Store, y compris ses exigences « Limited Use »/);
+  assert.match(privacy, /aucune requête au service n’est envoyée sans l’autorisation facultative/);
+  assert.doesNotMatch(privacy, /historique est désactivé par défaut/i);
+  assert.match(publicPolicySource, /respecte la politique des données utilisateur du Chrome Web Store, y compris ses exigences « Limited Use »/);
+  assert.match(publicPolicySource, /product-images\.s3\.cardmarket\.com/);
+  assert.match(publicPolicySource, /aucune requête à ce service n’est envoyée sans l’autorisation facultative/);
+  assert.doesNotMatch(publicPolicySource, /historique est désactivé par défaut/i);
   assert.doesNotMatch(privacy, /Mave|Companion/);
 });

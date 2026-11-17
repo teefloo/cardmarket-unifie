@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Pokémon Cardmarket",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Langue et minima par état, aperçu et prix mini des listes Wants, historique pour les cartes Pokémon sur Cardmarket.",
   "permissions": ["storage"],
   "icons": {
