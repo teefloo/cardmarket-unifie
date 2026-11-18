@@ -27,7 +27,7 @@ L’extension n’achète rien, n’ajoute aucun article au panier et ne modifie
 - Langue de la fiche : français
 - Catégorie : Shopping
 - Icône : `assets/store/chrome-icon-128.png`
-- Capture d’écran principale : `assets/store/wantlist-screenshot-1280x800.png` — **ne pas soumettre dans son état actuel** : c’est une maquette avec des noms, prix et vignettes fictifs; elle doit être remplacée par une capture authentique de l’extension.
+- Capture d’écran principale : `assets/store/wantlist-screenshot-1280x800.png` — capture réelle de la liste Wants Cardmarket, recadrée pour montrer le tableau sans le nom ni le solde du compte.
 - Petite image promotionnelle (440 × 280) : `assets/store/cws-promo-440x280.png` — visuel promotionnel, pas une capture de l’interface; il utilise de vraies images produit Cardmarket et aucun prix inventé.
 - Image promotionnelle panoramique (1400 × 560) : `assets/store/cws-marquee-1400x560.png` — visuel promotionnel, pas une capture de l’interface; il utilise de vraies images produit Cardmarket et aucun prix inventé.
 - Politique de confidentialité : <https://gist.github.com/teefloo/1a335b487e7038b581022c5423018d78>
