@@ -1,55 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="440" height="280" viewBox="0 0 440 280" role="img" aria-labelledby="title desc">
-  <title id="title">Listes de cartes plus claires</title>
-  <desc id="desc">Aperçu compact des cartes recherchées et de leur prix minimum.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="440" height="280" viewBox="0 0 440 280" role="img" aria-labelledby="title desc">
+  <title id="title">Aperçu immédiat et prix mini par état et langue</title>
+  <desc id="desc">Des cartes Pokémon réelles illustrent les aperçus compacts et le prix mini selon l’état et la langue, directement dans une liste Wants Cardmarket.</desc>
   <defs>
-    <linearGradient id="canvas" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#F2F7FA"/><stop offset="1" stop-color="#E4F1F2"/></linearGradient>
-    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#17324D"/><stop offset="1" stop-color="#10253C"/></linearGradient>
-    <linearGradient id="thumb1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#70D7D0"/><stop offset="1" stop-color="#245E74"/></linearGradient>
-    <linearGradient id="thumb2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#F3C97A"/><stop offset="1" stop-color="#C56F54"/></linearGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="145%" height="150%"><feDropShadow dx="0" dy="9" stdDeviation="10" flood-color="#16304A" flood-opacity=".16"/></filter>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#102238"/>
+      <stop offset="1" stop-color="#1B3C52"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#2CD1C0" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#2CD1C0" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-20%" width="170%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#061321" flood-opacity=".42"/>
+    </filter>
+    <clipPath id="small-card-clip" clipPathUnits="userSpaceOnUse"><rect width="83" height="117" rx="6"/></clipPath>
+    <clipPath id="main-card-clip" clipPathUnits="userSpaceOnUse"><rect width="112" height="159" rx="8"/></clipPath>
   </defs>
-  <rect width="440" height="280" rx="20" fill="url(#canvas)"/>
-  <circle cx="410" cy="38" r="67" fill="#2DD4BF" opacity=".13"/>
-  <circle cx="38" cy="265" r="94" fill="#B7D9E1" opacity=".25"/>
-  <g transform="translate(28 25)">
-    <rect width="28" height="28" rx="8" fill="#17324D"/>
-    <rect x="7" y="6" width="11" height="16" rx="2" fill="#F5FAFC"/>
-    <path d="M9 17l3-3 2 1 5-5" fill="none" stroke="#2DD4BF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="38" y="19" fill="#17324D" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="1.1">LISTES DE CARTES</text>
+  <rect width="440" height="280" rx="20" fill="url(#bg)"/>
+  <circle cx="408" cy="42" r="126" fill="url(#glow)"/>
+  <path d="M0 232C108 194 170 291 288 228s114-46 152-84v136H0z" fill="#2CD1C0" opacity=".055"/>
+  <path d="M22 20h396" stroke="#6DDDD2" stroke-opacity=".18"/>
+
+  <g font-family="Arial, sans-serif">
+    <text x="29" y="43" fill="#8CE8DF" font-size="10" font-weight="700" letter-spacing="1.4">EXTENSION INDÉPENDANTE</text>
+    <text x="29" y="61" fill="#B4C8D4" font-size="10" letter-spacing="1.1">POUR CARDMARKET</text>
+
+    <text x="28" y="105" fill="#F5FAFC" font-family="Avenir Next, Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="-.65">Aperçu</text>
+    <text x="28" y="139" fill="#F5FAFC" font-family="Avenir Next, Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="-.65">immédiat</text>
+    <rect x="29" y="157" width="38" height="3" rx="1.5" fill="#2CD1C0"/>
+    <text x="29" y="185" fill="#DAE6EC" font-size="15" font-weight="600">Prix mini selon</text>
+    <text x="29" y="206" fill="#DAE6EC" font-size="15" font-weight="600">état et langue</text>
+    <text x="29" y="244" fill="#92AABB" font-size="10.5">Dans vos listes Wants</text>
   </g>
-  <text x="28" y="99" fill="#142A40" font-family="Arial, sans-serif" font-size="28" font-weight="750">Vos listes,</text>
-  <text x="28" y="132" fill="#142A40" font-family="Arial, sans-serif" font-size="28" font-weight="750">plus lisibles.</text>
-  <text x="29" y="164" fill="#53697C" font-family="Arial, sans-serif" font-size="14">Aperçu compact et prix mini.</text>
-  <text x="29" y="184" fill="#53697C" font-family="Arial, sans-serif" font-size="14">État et langue pris en compte.</text>
-  <g transform="translate(28 215)">
-    <rect width="112" height="28" rx="14" fill="#D2F5EF"/>
-    <circle cx="15" cy="14" r="4" fill="#118B82"/>
-    <text x="27" y="18" fill="#176760" font-family="Arial, sans-serif" font-size="11" font-weight="700">APERÇU + PRIX</text>
+
+  <g filter="url(#shadow)" transform="translate(242 92) rotate(-9 41.5 58.5)">
+    <rect x="-4" y="-4" width="91" height="125" rx="9" fill="#F5FAFC"/>
+    <image x="0" y="0" width="83" height="117" href="card-art/539278-ditto-vmax-shf-051.jpg" xlink:href="card-art/539278-ditto-vmax-shf-051.jpg" preserveAspectRatio="xMidYMid slice" clip-path="url(#small-card-clip)"/>
   </g>
-  <g filter="url(#shadow)">
-    <rect x="220" y="48" width="194" height="198" rx="14" fill="#FFFFFF"/>
-    <rect x="220" y="48" width="194" height="38" rx="14" fill="url(#panel)"/>
-    <path d="M220 72h194v14H220z" fill="url(#panel)"/>
-    <text x="237" y="72" fill="#F7FBFD" font-family="Arial, sans-serif" font-size="12" font-weight="700">WANTS</text>
-    <rect x="339" y="60" width="55" height="15" rx="7.5" fill="#2DD4BF" opacity=".2"/>
-    <text x="350" y="71" fill="#B9FFF4" font-family="Arial, sans-serif" font-size="8" font-weight="700">FR · NM</text>
-    <g transform="translate(237 100)">
-      <rect width="31" height="42" rx="4" fill="url(#thumb1)"/>
-      <circle cx="16" cy="18" r="9" fill="#D8FFF9" opacity=".7"/>
-      <path d="M5 36l9-11 7 6 6-8" fill="none" stroke="#F4FFFD" stroke-width="2" stroke-linecap="round"/>
-      <text x="42" y="15" fill="#253D52" font-family="Arial, sans-serif" font-size="10" font-weight="700">Aube de verre</text>
-      <text x="42" y="32" fill="#8293A1" font-family="Arial, sans-serif" font-size="9">État NM · Français</text>
-      <text x="42" y="51" fill="#118B82" font-family="Arial, sans-serif" font-size="12" font-weight="700">12,40 €</text>
-    </g>
-    <path d="M237 162h160" stroke="#EDF1F4"/>
-    <g transform="translate(237 176)">
-      <rect width="31" height="42" rx="4" fill="url(#thumb2)"/>
-      <path d="M4 29l8-16 7 10 8-7" fill="none" stroke="#FFF9EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="21" cy="12" r="3" fill="#FFF9EC"/>
-      <text x="42" y="15" fill="#253D52" font-family="Arial, sans-serif" font-size="10" font-weight="700">Sentinelle d’ambre</text>
-      <text x="42" y="32" fill="#8293A1" font-family="Arial, sans-serif" font-size="9">État NM · Français</text>
-      <text x="42" y="51" fill="#118B82" font-family="Arial, sans-serif" font-size="12" font-weight="700">8,75 €</text>
-    </g>
+  <g filter="url(#shadow)" transform="translate(344 104) rotate(10 41.5 58.5)">
+    <rect x="-4" y="-4" width="91" height="125" rx="9" fill="#F5FAFC"/>
+    <image x="0" y="0" width="83" height="117" href="card-art/691920-glaceon-vstar-crz-gg40.jpg" xlink:href="card-art/691920-glaceon-vstar-crz-gg40.jpg" preserveAspectRatio="xMidYMid slice" clip-path="url(#small-card-clip)"/>
+  </g>
+  <g filter="url(#shadow)" transform="translate(285 38)">
+    <rect x="-5" y="-5" width="122" height="169" rx="11" fill="#F6FBFC"/>
+    <image x="0" y="0" width="112" height="159" href="card-art/691930-darkrai-vstar-crz-gg50.jpg" xlink:href="card-art/691930-darkrai-vstar-crz-gg50.jpg" preserveAspectRatio="xMidYMid slice" clip-path="url(#main-card-clip)"/>
+  </g>
+
+  <g transform="translate(29 256)">
+    <circle cx="3" cy="0" r="3" fill="#2CD1C0"/>
+    <text x="12" y="4" fill="#B5C9D6" font-family="Arial, sans-serif" font-size="9.5" letter-spacing=".2">APERÇUS COMPACTS · AVANT LE SHOPPING WIZARD</text>
   </g>
 </svg>

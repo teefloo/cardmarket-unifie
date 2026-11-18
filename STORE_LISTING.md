@@ -27,9 +27,9 @@ L’extension n’achète rien, n’ajoute aucun article au panier et ne modifie
 - Langue de la fiche : français
 - Catégorie : Shopping
 - Icône : `assets/store/chrome-icon-128.png`
-- Capture d’écran principale : `assets/store/wantlist-screenshot-1280x800.png`
-- Petite image promotionnelle : `assets/store/cws-promo-440x280.png`
-- Image promotionnelle panoramique : `assets/store/cws-marquee-1400x560.png`
+- Capture d’écran principale : `assets/store/wantlist-screenshot-1280x800.png` — **ne pas soumettre dans son état actuel** : c’est une maquette avec des noms, prix et vignettes fictifs; elle doit être remplacée par une capture authentique de l’extension.
+- Petite image promotionnelle (440 × 280) : `assets/store/cws-promo-440x280.png` — visuel promotionnel, pas une capture de l’interface; il utilise de vraies images produit Cardmarket et aucun prix inventé.
+- Image promotionnelle panoramique (1400 × 560) : `assets/store/cws-marquee-1400x560.png` — visuel promotionnel, pas une capture de l’interface; il utilise de vraies images produit Cardmarket et aucun prix inventé.
 - Politique de confidentialité : <https://gist.github.com/teefloo/1a335b487e7038b581022c5423018d78>
 - Page d’assistance : laisser vide et utiliser le Centre d’assistance intégré au Chrome Web Store
 - Distribution : tous les pays/régions, extension gratuite, contenu mature désactivé
